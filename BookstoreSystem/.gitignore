@@ -1,0 +1,39 @@
+# IntelliJ project files
+.idea/
+*.iml
+
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Maven build directory
+target/
+
+# Gradle build directory
+build/
+
+# Eclipse project files
+.classpath
+.project
+.settings/
+
+# Operating System Files
+.DS_Store
+
+# JADE logs
+log/
+
+# JADE generated files
+bin/
+
+# JADE temporary files
+.tmp/
+
+# JADE workspace files
+.workspace/
+
+# JADE configuration files
+*.properties
+*.cfg
