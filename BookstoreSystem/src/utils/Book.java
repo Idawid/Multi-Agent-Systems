@@ -1,14 +1,22 @@
 package utils;
 
-public class Book {
+import java.io.Serializable;
+
+public class Book implements Serializable {
     private String title;
     private String author;
-    private BookType bookType;
+    private String genre;
+    private double price;
+    private boolean availability;
+    private String deliveryDate;
 
-    public Book(String title, String author, BookType bookType) {
+    public Book(String title, String author, String genre, double price, boolean availability, String deliveryDate) {
         this.title = title;
         this.author = author;
-        this.bookType = bookType;
+        this.genre = genre;
+        this.price = price;
+        this.availability = availability;
+        this.deliveryDate = deliveryDate;
     }
 
     public String getTitle() {
@@ -27,20 +35,57 @@ public class Book {
         this.author = author;
     }
 
-    public BookType getBookType() {
-        return bookType;
+    public String getGenre() {
+        return genre;
     }
 
-    public void setBookType(BookType bookType) {
-        this.bookType = bookType;
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public boolean isAvailability() {
+        return availability;
+    }
+
+    public void setAvailability(boolean availability) {
+        this.availability = availability;
+    }
+
+    public String getDeliveryDate() {
+        return deliveryDate;
+    }
+
+    public void setDeliveryDate(String deliveryDate) {
+        this.deliveryDate = deliveryDate;
+    }
+
+    public String getPrintingDate() {
+        return deliveryDate;
     }
 
     @Override
     public String toString() {
-        return "Book{" +
-                "title='" + title + '\'' +
-                ", author='" + author + '\'' +
-                ", bookType=" + bookType +
-                '}';
+        return String.format("%s,%s,%s,%.2f,%s,%s",
+                title, author, genre, price, availability, deliveryDate);
+    }
+
+    // Deserializer
+    public static Book fromString(String bookString) {
+        String[] parts = bookString.split(",");
+        String title = parts[0];
+        String author = parts[1];
+        String genre = parts[2];
+        double price = Double.parseDouble(parts[3]);
+        boolean availability = Boolean.parseBoolean(parts[4]);
+        String deliveryDate = parts[5];
+        return new Book(title, author, genre, price, availability, deliveryDate);
     }
 }
