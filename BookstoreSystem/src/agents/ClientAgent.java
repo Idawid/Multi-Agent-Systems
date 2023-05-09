@@ -12,6 +12,7 @@ import utils.Constants;
 import utils.MyListSerializer;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
 
 public class ClientAgent extends Agent {
@@ -55,10 +56,18 @@ public class ClientAgent extends Agent {
                 sendCFP();
             }
             else {
-                // TODO handle race in a better way
-                addBehaviour(new RequestBookstoreList());
+                repeatRequest(new RequestBookstoreList());
             }
         }
+    }
+
+    private <T extends OneShotBehaviour> void repeatRequest(T behaviour) {
+        addBehaviour(new WakerBehaviour(this, 3000) {
+            @Override
+            public void onWake() {
+                myAgent.addBehaviour(behaviour);
+            }
+        });
     }
     private void sendCFP() {
         ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
