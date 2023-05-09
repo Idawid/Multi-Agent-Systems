@@ -7,7 +7,7 @@ import java.util.Random;
 public class BookInitializer {
     private static final Random random = new Random();
 
-    public static List<Book> initializeBooks(String genre, int num) {
+    public static List<Book> initializeBooks(BookType genre, int num) {
         List<Book> books = new ArrayList<>();
         String[] titles = {"The Great Gatsby", "1984", "The Elements of Style", "To Kill a Mockingbird", "Pride and Prejudice",
                 "One Hundred Years of Solitude", "Moby-Dick", "Wuthering Heights", "The Catcher in the Rye",

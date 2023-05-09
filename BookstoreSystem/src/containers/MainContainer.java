@@ -12,14 +12,14 @@ import utils.Constants;
 public class MainContainer {
     private AgentContainer mainContainer;
 
-    public MainContainer() {
+    public MainContainer(String containerName) {
         // Initialize main container
         Runtime rt = Runtime.instance();
         Profile p = new ProfileImpl();
         p.setParameter(Profile.MAIN_HOST, "localhost");
         p.setParameter(Profile.MAIN_PORT, "1099");
         p.setParameter(Profile.GUI, "true");
-        p.setParameter(Profile.CONTAINER_NAME, "MainContainer");
+        p.setParameter(Profile.CONTAINER_NAME, containerName);
         mainContainer = rt.createMainContainer(p);
     }
 

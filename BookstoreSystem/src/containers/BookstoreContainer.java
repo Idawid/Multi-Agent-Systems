@@ -8,6 +8,8 @@ import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
 import utils.Book;
+import utils.BookType;
+import utils.Constants;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +17,7 @@ import java.util.Map;
 
 public class BookstoreContainer {
     private AgentContainer bookstoreContainer;
-    public BookstoreContainer(String containerName, int id, String genre, List<Book> books) {
+    public BookstoreContainer(String containerName, int id, BookType genre, List<Book> books) {
         // Initialize bookstore container
         Runtime rt = Runtime.instance();
         Profile p = new ProfileImpl();
@@ -31,12 +33,12 @@ public class BookstoreContainer {
             bookMap.put(book.getTitle(), book);
         }
         ManagerAgent managerAgent = new ManagerAgent(bookMap);
-        addAgent("managerAgent" + id, managerAgent);
+        addAgent(Constants.AGENT_MANAGER_PREFIX + id, managerAgent);
 
         // Seller
-        AID managerAgentAID = new AID("managerAgent" + id, AID.ISLOCALNAME);
+        AID managerAgentAID = new AID(Constants.AGENT_MANAGER_PREFIX + id, AID.ISLOCALNAME);
         SellerAgent sellerAgent = new SellerAgent(managerAgentAID, genre);
-        addAgent("sellerAgent" + id, sellerAgent);
+        addAgent(Constants.AGENT_SELLER_PREFIX + id, sellerAgent);
     }
 
     public void addAgent(String agentName, Agent agent) {

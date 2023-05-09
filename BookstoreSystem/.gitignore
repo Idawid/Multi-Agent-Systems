@@ -37,3 +37,8 @@ bin/
 # JADE configuration files
 *.properties
 *.cfg
+
+# JADE runtime configuration
+APDescription.txt
+MTPs-Main-Container.txt
+MTPs-MainContainer.txt

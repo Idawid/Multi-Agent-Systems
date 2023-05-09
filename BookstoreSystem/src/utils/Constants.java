@@ -1,11 +1,6 @@
 package utils;
 
 public class Constants {
-    public static final String GENRE_IT = "IT";
-    public static final String GENRE_SCIENCE = "Science";
-    public static final String GENRE_FICTION = "Fiction";
-    public static final String GENRE_HORROR = "Horror";
-
     public static final String AGENT_DF = "DirectoryFacilitator";
     public static final String AGENT_CLIENT = "ClientAgent";
     public static final String AGENT_SELLER_PREFIX = "SellerAgent_";

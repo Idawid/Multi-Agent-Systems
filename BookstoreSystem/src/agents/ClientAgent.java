@@ -11,6 +11,7 @@ import utils.Book;
 import utils.Constants;
 import utils.MyListSerializer;
 
+import java.io.IOException;
 import java.util.*;
 
 public class ClientAgent extends Agent {
@@ -34,23 +35,27 @@ public class ClientAgent extends Agent {
         public void action() {
             // Send a request for SellerAgents for the specified genre
             ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
-            request.addReceiver(new AID("directoryFacilitatorAgent", AID.ISLOCALNAME));
-            request.setContent(desiredBooks.get(0).getGenre());
+            request.addReceiver(new AID(Constants.AGENT_DF, AID.ISLOCALNAME));
+            try {
+                request.setContentObject(desiredBooks.get(0).getGenre());
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
             send(request);
 
             // Handle the response
             ACLMessage response = receive(MessageTemplate.MatchPerformative(ACLMessage.INFORM));
             if (response != null) {
-                List<String> deserializedSellerAgents = (List<String>)MyListSerializer.deserialize(response.getContent());
-                List<AID> tempSellerAgents = new ArrayList<>();
-                for (String aidStr : deserializedSellerAgents) {
-                    tempSellerAgents.add(new AID(aidStr, AID.ISGUID));
+                sellerAgents = MyListSerializer.deserializeList(response.getContent());
+                if (sellerAgents == null) {
+                    System.err.println("Client couldn't deserialize seller agents from response.");
+                    return;
                 }
-                sellerAgents = tempSellerAgents;
                 sendCFP();
             }
             else {
-                // XD
+                // TODO handle race in a better way
                 addBehaviour(new RequestBookstoreList());
             }
         }
@@ -60,7 +65,8 @@ public class ClientAgent extends Agent {
         for (AID sellerAgent : sellerAgents) {
             cfp.addReceiver(sellerAgent);
         }
-        cfp.setContent("request-books:" + MyListSerializer.serialize(desiredBooks) + ";desiredPrice:" + desiredPrice + ";desiredDate:" + desiredDate);
+        cfp.setContent("request-books:" + MyListSerializer.serializeList(desiredBooks) + ";desiredPrice:" + desiredPrice + ";desiredDate:" + desiredDate);
+
         cfp.setReplyByDate(new Date(System.currentTimeMillis() + 10000)); // 10 seconds
         // Add the behavior responsible for this CFP
         addBehaviour(new SendCallForProposal(cfp));
@@ -86,11 +92,13 @@ public class ClientAgent extends Agent {
 
         @Override
         protected void handleInform(ACLMessage inform) {
-            String name = inform.getSender().getName().split("@")[0];
-            System.out.println("Going to the bookstore number " + name.charAt(name.length() -1));
+            String name = inform.getSender().getLocalName();
+            // TODO horrible, handles id only of 1 length of one character and relies on the Agent's name
+            char agentId = name.charAt(name.length() -1);
+            System.out.println("Going to the bookstore number " + agentId);
 
             ContainerID targetContainer = new ContainerID();
-            targetContainer.setName(Constants.CONTAINER_BOOKSTORE_PREFIX + name.charAt(name.length() -1));
+            targetContainer.setName(Constants.CONTAINER_BOOKSTORE_PREFIX + agentId);
             targetContainer.setAddress("localhost");
             targetContainer.setPort("1099");
             doMove(targetContainer);

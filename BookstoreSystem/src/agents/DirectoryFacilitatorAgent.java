@@ -6,6 +6,7 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import utils.BookType;
 import utils.MyListSerializer;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class DirectoryFacilitatorAgent extends Agent {
-    private Map<String, List<AID>> genreToBookstores;
+    private Map<BookType, List<AID>> genreToBookstores;
 
     protected void setup() {
         genreToBookstores = new HashMap<>();
@@ -31,7 +32,13 @@ public class DirectoryFacilitatorAgent extends Agent {
         public void action() {
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
-                String genre = msg.getContent();
+                BookType genre;
+                try {
+                    genre = (BookType) msg.getContentObject();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return;
+                }
                 AID sellerAgent = msg.getSender();
 
                 genreToBookstores.putIfAbsent(genre, new ArrayList<>());
@@ -49,17 +56,19 @@ public class DirectoryFacilitatorAgent extends Agent {
         public void action() {
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
-                String requestedGenre = msg.getContent();
-                List<AID> sellerAgents = genreToBookstores.get(requestedGenre);
-                List<String> sellerAgentsNames = new ArrayList<>();
-                for (AID sellerAgentAID : sellerAgents) {
-                    sellerAgentsNames.add(sellerAgentAID.getName());
+                BookType requestedGenre;
+                try {
+                    requestedGenre = (BookType) msg.getContentObject();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return;
                 }
+                List<AID> sellerAgents = genreToBookstores.get(requestedGenre);
 
                 ACLMessage reply = msg.createReply();
                 if (sellerAgents != null && !sellerAgents.isEmpty()) {
                     reply.setPerformative(ACLMessage.INFORM);
-                    reply.setContent(MyListSerializer.serialize(sellerAgentsNames));
+                    reply.setContent(MyListSerializer.serializeList(sellerAgents));
                 } else {
                     reply.setPerformative(ACLMessage.FAILURE);
                     reply.setContent("No bookstores found for the requested genre.");

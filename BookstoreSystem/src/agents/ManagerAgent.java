@@ -1,6 +1,5 @@
 package agents;
 
-import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -9,7 +8,6 @@ import utils.Book;
 import utils.MyListSerializer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,10 +32,10 @@ public class ManagerAgent extends Agent {
                 // Parse the CFP message content
                 String content = msg.getContent();
                 String[] parts = content.split(";");
-                List<String> deserializedRequestedBooks = (List<String>)MyListSerializer.deserialize(parts[0].split(":")[1]);
-                List<Book> requestedBooks = new ArrayList<>();
-                for (String bookStr : deserializedRequestedBooks) {
-                    requestedBooks.add(Book.fromString(bookStr));
+                List<Book> requestedBooks = MyListSerializer.deserializeList(parts[0].split(":")[1]);
+                if (requestedBooks == null) {
+                    System.err.println("Manager couldn't deserialize the Client's request.");
+                    return;
                 }
                 double desiredPrice = Double.parseDouble(parts[1].split(":")[1]);
                 String desiredDate = parts[2].split(":")[1];
@@ -84,7 +82,7 @@ public class ManagerAgent extends Agent {
             List<Book> availableBooks = new ArrayList<>();
             for (Book requestedBook : requestedBooks) {
                 Book book = books.get(requestedBook.getTitle());
-                if (book != null && book.isAvailability()) {
+                if (book != null && book.isAvailable()) {
                     availableBooks.add(book);
                 }
             }
