@@ -1,78 +1,94 @@
 package agents;
 
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import utils.Book;
-import utils.BookType;
+import utils.MyListSerializer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 public class ManagerAgent extends Agent {
+    private Map<String, Book> books;
 
-    private List<Book> availableBooks;
+    public ManagerAgent(Map<String, Book> books) {
+        this.books = books;
+    }
 
-    @Override
     protected void setup() {
-        // Initialize the list of available books
-        initializeBooks();
+        addBehaviour(new HandleCallForProposal());
+    }
 
-        // Handle requests for book availability and price
-        addBehaviour(new CyclicBehaviour() {
-            @Override
-            public void action() {
-                MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
-                ACLMessage request = myAgent.receive(mt);
+    private class HandleCallForProposal extends CyclicBehaviour {
+        @Override
+        public void action() {
+            MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
+            ACLMessage msg = myAgent.receive(mt);
 
-                if (request != null) {
-                    String requestedTitle = request.getContent();
-                    List<Book> matchingBooks = findMatchingBooks(requestedTitle);
+            if (msg != null) {
+                // Parse the CFP message content
+                String content = msg.getContent();
+                String[] parts = content.split(";");
+                List<String> deserializedRequestedBooks = (List<String>)MyListSerializer.deserialize(parts[0].split(":")[1]);
+                List<Book> requestedBooks = new ArrayList<>();
+                for (String bookStr : deserializedRequestedBooks) {
+                    requestedBooks.add(Book.fromString(bookStr));
+                }
+                double desiredPrice = Double.parseDouble(parts[1].split(":")[1]);
+                String desiredDate = parts[2].split(":")[1];
 
-                    if (!matchingBooks.isEmpty()) {
-                        // Assume the first matching book is the one requested
-                        Book requestedBook = matchingBooks.get(0);
-                        double price = calculatePrice(requestedBook);
+                // Prepare the proposal
+                ACLMessage reply = msg.createReply();
+                List<Book> availableBooks = checkBooksAvailability(requestedBooks);
+                double totalPrice = calculateTotalPrice(availableBooks);
+                String estimatedDeliveryDate = estimateDeliveryDate(availableBooks);
 
-                        ACLMessage response = request.createReply();
-                        response.setPerformative(ACLMessage.INFORM);
-                        response.setContent("Title: " + requestedBook.getTitle() + ", Price: " + price);
-                        send(response);
-                    } else {
-                        ACLMessage response = request.createReply();
-                        response.setPerformative(ACLMessage.FAILURE);
-                        response.setContent("Book not available");
-                        send(response);
-                    }
+                if (!availableBooks.isEmpty() && totalPrice <= desiredPrice && estimatedDeliveryDate.compareTo(desiredDate) <= 0) {
+                    reply.setPerformative(ACLMessage.PROPOSE);
+                    reply.setContent("price:" + totalPrice + ",deliveryDate:" + estimatedDeliveryDate);
                 } else {
-                    block();
+                    reply.setPerformative(ACLMessage.REFUSE);
+                    reply.setContent("book-unavailable");
+                }
+
+                myAgent.send(reply);
+            } else {
+                block();
+            }
+        }
+        public String estimateDeliveryDate(List<Book> availableBooks) {
+            String latestDeliveryDate = null;
+            for (Book book : availableBooks) {
+                String deliveryDate = book.getDeliveryDate();
+                if (latestDeliveryDate == null || deliveryDate.compareTo(latestDeliveryDate) > 0) {
+                    latestDeliveryDate = deliveryDate;
                 }
             }
-        });
-    }
+            return latestDeliveryDate;
+        }
 
-    private void initializeBooks() {
-        availableBooks = new ArrayList<>();
-        availableBooks.add(new Book("Java for Beginners", "John Doe", BookType.IT));
-        availableBooks.add(new Book("Advanced Java", "Jane Smith", BookType.IT));
-        // Add more books as needed
-    }
+        public double calculateTotalPrice(List<Book> availableBooks) {
+            double totalPrice = 0.0;
+            for (Book book : availableBooks) {
+                totalPrice += book.getPrice();
+            }
+            return totalPrice;
+        }
 
-    private List<Book> findMatchingBooks(String title) {
-        return availableBooks.stream()
-                .filter(book -> book.getTitle().equalsIgnoreCase(title))
-                .collect(Collectors.toList());
-    }
-
-    private double calculatePrice(Book book) {
-        // Implement your price calculation logic here
-        // This is a simple example that sets a fixed price based on the book type
-        if (book.getBookType() == BookType.IT) {
-            return 25.0;
-        } else {
-            return 20.0;
+        private List<Book> checkBooksAvailability(List<Book> requestedBooks) {
+            List<Book> availableBooks = new ArrayList<>();
+            for (Book requestedBook : requestedBooks) {
+                Book book = books.get(requestedBook.getTitle());
+                if (book != null && book.isAvailability()) {
+                    availableBooks.add(book);
+                }
+            }
+            return availableBooks;
         }
     }
 }
