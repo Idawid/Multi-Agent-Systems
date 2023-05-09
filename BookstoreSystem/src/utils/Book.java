@@ -5,12 +5,12 @@ import java.io.Serializable;
 public class Book implements Serializable {
     private String title;
     private String author;
-    private String genre;
+    private BookType genre;
     private double price;
     private boolean availability;
     private String deliveryDate;
 
-    public Book(String title, String author, String genre, double price, boolean availability, String deliveryDate) {
+    public Book(String title, String author, BookType genre, double price, boolean availability, String deliveryDate) {
         this.title = title;
         this.author = author;
         this.genre = genre;
@@ -35,11 +35,11 @@ public class Book implements Serializable {
         this.author = author;
     }
 
-    public String getGenre() {
+    public BookType getGenre() {
         return genre;
     }
 
-    public void setGenre(String genre) {
+    public void setGenre(BookType genre) {
         this.genre = genre;
     }
 
@@ -51,7 +51,7 @@ public class Book implements Serializable {
         this.price = price;
     }
 
-    public boolean isAvailability() {
+    public boolean isAvailable() {
         return availability;
     }
 
@@ -75,17 +75,5 @@ public class Book implements Serializable {
     public String toString() {
         return String.format("%s,%s,%s,%.2f,%s,%s",
                 title, author, genre, price, availability, deliveryDate);
-    }
-
-    // Deserializer
-    public static Book fromString(String bookString) {
-        String[] parts = bookString.split(",");
-        String title = parts[0];
-        String author = parts[1];
-        String genre = parts[2];
-        double price = Double.parseDouble(parts[3]);
-        boolean availability = Boolean.parseBoolean(parts[4]);
-        String deliveryDate = parts[5];
-        return new Book(title, author, genre, price, availability, deliveryDate);
     }
 }

@@ -6,12 +6,14 @@ import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.ContractNetResponder;
+import utils.BookType;
+import utils.Constants;
 
 public class SellerAgent extends Agent {
     private AID managerAgentAID;
-    private String genre;
+    private BookType genre;
 
-    public SellerAgent(AID managerAgentAID, String genre) {
+    public SellerAgent(AID managerAgentAID, BookType genre) {
         this.managerAgentAID = managerAgentAID;
         this.genre = genre;
     }
@@ -29,8 +31,14 @@ public class SellerAgent extends Agent {
         @Override
         public void action() {
             ACLMessage inform = new ACLMessage(ACLMessage.INFORM);
-            inform.addReceiver(getAID("directoryFacilitatorAgent"));
-            inform.setContent(genre);
+            inform.addReceiver(getAID(Constants.AGENT_DF));
+            try {
+                inform.setContentObject(genre);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
             myAgent.send(inform);
         }
     }

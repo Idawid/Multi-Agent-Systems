@@ -1,6 +1,8 @@
 package utils;
 
-public enum BookType {
+import java.io.Serializable;
+
+public enum BookType implements Serializable {
     IT("IT"),
     SCIENCE("Science"),
     FICTION("Fiction"),
