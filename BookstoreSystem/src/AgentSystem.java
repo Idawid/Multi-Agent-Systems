@@ -25,8 +25,8 @@ public class AgentSystem {
         List<Book> itBooks1 = BookInitializer.initializeBooks(BookType.IT, 60);
         List<Book> itBooks2 = BookInitializer.initializeBooks(BookType.IT, 10);
         List<Book> itBooks3 = BookInitializer.initializeBooks(BookType.IT, 10);
-        List<Book> scienceBooks1 = BookInitializer.initializeBooks(BookType.IT, 10);
-        List<Book> scienceBooks2 = BookInitializer.initializeBooks(BookType.IT, 10);
+        List<Book> scienceBooks1 = BookInitializer.initializeBooks(BookType.SCIENCE, 10);
+        List<Book> scienceBooks2 = BookInitializer.initializeBooks(BookType.SCIENCE, 10);
 
         // Create bookstores with different genres and lists of books
         BookstoreContainer bookstore1 = new BookstoreContainer(Constants.CONTAINER_BOOKSTORE_PREFIX, 1, BookType.IT, itBooks1);
