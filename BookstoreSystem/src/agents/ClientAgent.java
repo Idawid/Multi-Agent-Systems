@@ -93,8 +93,7 @@ public class ClientAgent extends Agent {
         @Override
         protected void handleInform(ACLMessage inform) {
             String name = inform.getSender().getLocalName();
-            // TODO horrible, handles id only of 1 length of one character and relies on the Agent's name
-            char agentId = name.charAt(name.length() -1);
+            String agentId = name.substring(Constants.AGENT_SELLER_PREFIX.length());
             System.out.println("Going to the bookstore number " + agentId);
 
             ContainerID targetContainer = new ContainerID();
