@@ -1,6 +1,12 @@
 # IntelliJ project files
-.idea/
-*.iml
+.idea/**/workspace.xml
+.idea/**/vcs.xml
+.idea/**/misc.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+# *.iml
 
 # Compiled class files
 *.class
