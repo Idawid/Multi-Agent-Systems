@@ -2,6 +2,7 @@ package agents;
 
 import jade.core.Agent;
 import jade.core.behaviours.TickerBehaviour;
+import utils.Location;
 import utils.Task;
 import utils.TaskAllocator;
 
@@ -11,7 +12,12 @@ import java.util.List;
 public class WarehouseAgent extends Agent {
     private List<TruckAgent> trucks;
     private List<Task> tasks;
+    private Location location;
 
+    public WarehouseAgent(Location location, List<TruckAgent> trucks) {
+        this.location = location;
+        this.trucks = trucks;
+    }
     protected void setup() {
         this.trucks = new ArrayList<>();
         this.tasks = new ArrayList<>();

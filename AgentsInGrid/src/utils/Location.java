@@ -9,6 +9,11 @@ public class Location {
         this.y = y;
     }
 
+    public Location(Location location) {
+        this.x = location.getX();
+        this.y = location.getY();
+    }
+
     public int getX() {
         return x;
     }
@@ -22,5 +27,18 @@ public class Location {
         int deltaY = otherLocation.getY() - y;
 
         return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public void setLocation(Location location) {
+        this.x = location.getX();
+        this.y = location.getY();
     }
 }

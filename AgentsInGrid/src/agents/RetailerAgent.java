@@ -7,11 +7,10 @@ import jade.lang.acl.UnreadableException;
 import utils.Location;
 import utils.Task;
 
-public class RetailerAgent extends Agent {
-    private Location location;
+public class RetailerAgent extends BaseAgent {
 
     public RetailerAgent(Location location) {
-        this.location = location;
+        super(location);
     }
 
     protected void setup() {
@@ -39,10 +38,6 @@ public class RetailerAgent extends Agent {
                 }
             }
         });
-    }
-
-    public Location getLocation() {
-        return location;
     }
 }
 

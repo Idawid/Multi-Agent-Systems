@@ -17,7 +17,6 @@ import java.util.List;
 public class RetailerContainer {
     private static int idCounter = 0;
     private ContainerController retailerContainer;
-    private List<RetailerAgent> agents = new ArrayList<>();
 
     public RetailerContainer(String containerName, List<Location> retailerLocations) {
         Runtime rt = Runtime.instance();
@@ -28,6 +27,7 @@ public class RetailerContainer {
         p.setParameter(Profile.GUI, "true");
         retailerContainer = rt.createAgentContainer(p);
 
+        // Retailers
         for (Location location : retailerLocations) {
             RetailerAgent retailerAgent = new RetailerAgent(location);
             addAgent(Constants.AGENT_RETAIL_PREFIX + idCounter, retailerAgent);

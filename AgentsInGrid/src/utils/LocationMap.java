@@ -1,33 +1,44 @@
 package utils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class LocationMap {
-    private static List<Location> locations;
+    private static int mapBoundX;
+    private static int mapBoundY;
+    private static Map<String, LocationPin> locationPins;
 
-    public LocationMap() {
-        this.locations = new ArrayList<>();
+    static {
+        locationPins = new HashMap<>();
+    }
+    public LocationMap(int mapBoundX, int mapBoundY) {
+        this.mapBoundX = mapBoundX;
+        this.mapBoundY = mapBoundY;
+        locationPins = new HashMap<>();
     }
 
-    public void addLocation(Location location) {
-        locations.add(location);
+    public int getMapBoundX() {
+        return mapBoundX;
     }
 
-    public void removeLocation(Location location) {
-        locations.remove(location);
+    public int getMapBoundY() {
+        return mapBoundY;
     }
 
-    public List<Location> getLocations() {
-        return locations;
+    public static void addLocationPin(String agentName, LocationPin pin) {
+        locationPins.put(agentName, pin);
     }
 
-    public static double getDistanceBetweenLocations(Location location1, Location location2) {
-        if (!locations.contains(location1) || !locations.contains(location2)) {
-            throw new IllegalArgumentException("One or both locations are not on the map.");
-        }
+    public static void removeLocationPin(String agentName) {
+        locationPins.remove(agentName);
+    }
 
-        return location1.getDistance(location2);
+    public static void updateLocationPin(String agentName, LocationPin pin) {
+        // Map.put() also updates the record
+        locationPins.put(agentName, pin);
+    }
+
+    public static LocationPin getLocationPin(String agentName) {
+        return locationPins.get(agentName);
     }
 }
 
