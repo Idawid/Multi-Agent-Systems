@@ -46,6 +46,9 @@ public class LocationMapVisualizer extends Application {
     }
 
     private void refreshVisualization() {
+        if(root == null) {
+            return;
+        }
         root.getChildren().clear();
         for (LocationPin pin : locationPins.values()) {
             addPin(pin);
@@ -53,11 +56,17 @@ public class LocationMapVisualizer extends Application {
     }
 
     private void addPin(LocationPin pin) {
+        if(root == null) {
+            return;
+        }
         Circle pinShape = new Circle(pin.getX(), pin.getY(), PIN_RADIUS);
         root.getChildren().add(pinShape);
     }
 
     private void removePin(LocationPin pin) {
+        if(root == null) {
+            return;
+        }
         root.getChildren().removeIf(node ->
                 node instanceof Circle && ((Circle) node).getCenterX() == pin.getX() &&
                         ((Circle) node).getCenterY() == pin.getY());
