@@ -14,6 +14,7 @@ public class RetailerAgent extends BaseAgent {
     }
 
     protected void setup() {
+        super.setup();
         // Add behaviour to listen for deliveries from TruckAgent
         addBehaviour(new CyclicBehaviour(this) {
             public void action() {

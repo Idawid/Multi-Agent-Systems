@@ -8,6 +8,7 @@ import jade.core.Runtime;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
+import simulation.LocationMapVisualizer;
 import utils.Constants;
 import utils.Location;
 import utils.LocationInitializer;
@@ -37,5 +38,9 @@ public class AgentSystem {
 
         LocationInitializer.generateRandomLocations(5, 0, 100, 0, 100);
         WarehouseContainer warehouseContainer1 = new WarehouseContainer(Constants.CONTAINER_WAREHOUSE_PREFIX, 1, warehouseLocations1, truckLocations1);
+
+        LocationMapVisualizer visualizer = new LocationMapVisualizer();
+        LocationMapVisualizer.startVisualization();
+        visualizer.initLocationPins(LocationMap.getLocationPins());
     }
 }

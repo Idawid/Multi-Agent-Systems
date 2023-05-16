@@ -16,10 +16,14 @@ public class BaseAgent extends Agent {
         this.locationPin = new LocationPin(location, this.getClass());
     }
 
-    protected void setup() {
+    protected void init() {
         // Local name is always unique across the Agent subclass
         LocationMap.addLocationPin(this.getLocalName(), locationPin);
         startPositionUpdate();
+    }
+
+    protected void setup() {
+        init();
     }
 
     protected void takeDown() {

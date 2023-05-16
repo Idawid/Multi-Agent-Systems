@@ -1,5 +1,8 @@
 package utils;
 
+import javafx.collections.ObservableMap;
+import simulation.LocationMapVisualizer;
+
 import java.util.*;
 
 public class LocationMap {
@@ -26,19 +29,32 @@ public class LocationMap {
 
     public static void addLocationPin(String agentName, LocationPin pin) {
         locationPins.put(agentName, pin);
+        if (LocationMapVisualizer.getLocationPins() != null) {
+            LocationMapVisualizer.getLocationPins().put(agentName, pin);
+        }
     }
 
     public static void removeLocationPin(String agentName) {
         locationPins.remove(agentName);
+        if (LocationMapVisualizer.getLocationPins() != null) {
+            LocationMapVisualizer.getLocationPins().remove(agentName);
+        }
     }
 
     public static void updateLocationPin(String agentName, LocationPin pin) {
-        // Map.put() also updates the record
+        // Map.put() updates the records too
         locationPins.put(agentName, pin);
+        if (LocationMapVisualizer.getLocationPins() != null) {
+            LocationMapVisualizer.getLocationPins().put(agentName, pin);
+        }
     }
 
     public static LocationPin getLocationPin(String agentName) {
         return locationPins.get(agentName);
+    }
+
+    public static Map<String, LocationPin> getLocationPins() {
+        return locationPins;
     }
 }
 
