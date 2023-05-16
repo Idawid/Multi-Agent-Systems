@@ -1,0 +1,46 @@
+package containers;
+
+import agents.RetailerAgent;
+import jade.core.Agent;
+import jade.core.Profile;
+import jade.core.ProfileImpl;
+import jade.core.Runtime;
+import jade.wrapper.AgentController;
+import jade.wrapper.ContainerController;
+import jade.wrapper.StaleProxyException;
+import utils.Constants;
+import utils.Location;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class RetailerContainer {
+    private static int idCounter = 0;
+    private ContainerController retailerContainer;
+    private List<RetailerAgent> agents = new ArrayList<>();
+
+    public RetailerContainer(String containerName, List<Location> retailerLocations) {
+        Runtime rt = Runtime.instance();
+        Profile p = new ProfileImpl();
+        p.setParameter(Profile.MAIN_HOST, "localhost");
+        p.setParameter(Profile.MAIN_PORT, "1099");
+        p.setParameter(Profile.CONTAINER_NAME, containerName);
+        p.setParameter(Profile.GUI, "true");
+        retailerContainer = rt.createAgentContainer(p);
+
+        for (Location location : retailerLocations) {
+            RetailerAgent retailerAgent = new RetailerAgent(location);
+            addAgent(Constants.AGENT_RETAIL_PREFIX + idCounter, retailerAgent);
+            idCounter++;
+        }
+    }
+
+    public void addAgent(String agentName, Agent agent) {
+        try {
+            AgentController agentController = retailerContainer.acceptNewAgent(agentName, agent);
+            agentController.start();
+        } catch (StaleProxyException e) {
+            e.printStackTrace();
+        }
+    }
+}
