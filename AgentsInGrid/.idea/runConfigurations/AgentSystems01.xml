@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="AgentSystems01" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="AgentSystem" />
+    <module name="AgentsInGrid" />
+    <option name="VM_PARAMETERS" value="--module-path &quot;$PROJECT_DIR$\libs\javafx\lib&quot; --add-modules=javafx.base,javafx.controls,javafx.graphics,javafx.media" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
