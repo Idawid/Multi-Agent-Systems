@@ -1,1 +1,0 @@
-INTERESTS = ["sports", "traveling", "agent systems", ...]
