@@ -8,7 +8,7 @@ import jade.core.Runtime;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
-import utils.Constants;
+import simulationUtils.Constants;
 import utils.Location;
 
 import java.util.ArrayList;

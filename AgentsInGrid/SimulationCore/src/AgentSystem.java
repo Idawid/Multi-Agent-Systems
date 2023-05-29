@@ -1,17 +1,11 @@
 import containers.MainContainer;
 import containers.RetailerContainer;
 import containers.WarehouseContainer;
-import jade.core.Profile;
-import jade.core.ProfileImpl;
-import jade.core.*;
-import jade.core.Runtime;
-import jade.wrapper.AgentController;
-import jade.wrapper.ContainerController;
-import jade.wrapper.StaleProxyException;
-import simulation.LocationMapVisualizer;
-import utils.Constants;
+//import simulation.LocationMapVisualizer;
+import simulationUtils.Constants;
+import simulationUtils.LocationInitializer;
+import simulationUtils.LocationMapObserver;
 import utils.Location;
-import utils.LocationInitializer;
 import utils.LocationMap;
 
 import java.util.ArrayList;
@@ -24,7 +18,7 @@ public class AgentSystem {
         containers.MainContainer mainContainer = new MainContainer(Constants.CONTAINER_MAIN);
 
         // Init the map
-        LocationMap map = new LocationMap(Constants.MAP_BOUND_X, Constants.MAP_BOUND_Y);
+        LocationMapObserver map = new LocationMapObserver(LocationMap.getInstance());
 
         // Load the locations for different retailers
         List<Location> retailerLocations = LocationInitializer.generateRandomLocations(3, 0, 100, 0, 100);
@@ -39,9 +33,9 @@ public class AgentSystem {
         LocationInitializer.generateRandomLocations(5, 0, 100, 0, 100);
         WarehouseContainer warehouseContainer1 = new WarehouseContainer(Constants.CONTAINER_WAREHOUSE_PREFIX, 1, warehouseLocations1, truckLocations1);
 
-        LocationMapVisualizer visualizer = new LocationMapVisualizer();
-        visualizer.initLocationPins(LocationMap.getLocationPins());
-        LocationMapVisualizer.startVisualization();
-        visualizer.initLocationPins(LocationMap.getLocationPins());
+//        LocationMapVisualizer visualizer = new LocationMapVisualizer();
+//        visualizer.initLocationPins(utils.LocationMap.getLocationPins());
+//        LocationMapVisualizer.startVisualization();
+//        visualizer.initLocationPins(utils.LocationMap.getLocationPins());
     }
 }

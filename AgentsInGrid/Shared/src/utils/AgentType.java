@@ -1,14 +1,11 @@
 package utils;
 
-import agents.RetailerAgent;
-import agents.TruckAgent;
-import agents.WarehouseAgent;
 import jade.core.Agent;
 
 public enum AgentType {
-    AGENT_RETAILER(RetailerAgent.class),
-    AGENT_TRUCK(TruckAgent.class),
-    AGENT_WAREHOUSE(WarehouseAgent.class);
+    AGENT_RETAILER,
+    AGENT_TRUCK,
+    AGENT_WAREHOUSE;
 
     private final Class<? extends Agent> agentClass;
 
@@ -16,10 +13,11 @@ public enum AgentType {
         this.agentClass = agentClass;
     }
 
+    AgentType() { agentClass = null; }
+
     public Class<? extends Agent> getAgentClass() {
         return agentClass;
     }
-
     public static AgentType getByAgentClass(Class<? extends Agent> agentClass) {
         for (AgentType agentType : AgentType.values()) {
             if (agentType.getAgentClass().equals(agentClass)) {

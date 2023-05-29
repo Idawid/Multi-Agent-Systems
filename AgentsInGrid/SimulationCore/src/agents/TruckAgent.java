@@ -6,11 +6,10 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
-import utils.AgentFinder;
-import utils.DeliveryTimeEstimator;
-import utils.LocationMap;
+import simulationUtils.AgentFinder;
+import simulationUtils.DeliveryTimeEstimator;
 import utils.Location;
-import utils.Task;
+import simulationUtils.Task;
 
 import java.io.IOException;
 import java.util.ArrayList;

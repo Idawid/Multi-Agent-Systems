@@ -3,8 +3,8 @@ package agents;
 import jade.core.Agent;
 import jade.core.behaviours.TickerBehaviour;
 import utils.Location;
-import utils.Task;
-import utils.TaskAllocator;
+import simulationUtils.Task;
+import simulationUtils.TaskAllocator;
 
 import java.util.ArrayList;
 import java.util.List;

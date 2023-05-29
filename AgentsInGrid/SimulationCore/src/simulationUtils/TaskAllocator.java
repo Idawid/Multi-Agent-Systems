@@ -1,4 +1,4 @@
-package utils;
+package simulationUtils;
 
 import agents.TruckAgent;
 

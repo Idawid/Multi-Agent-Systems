@@ -1,7 +1,6 @@
-package utils;
+package simulationUtils;
 
 import agents.RetailerAgent;
-import agents.TruckAgent;
 
 import java.io.Serializable;
 

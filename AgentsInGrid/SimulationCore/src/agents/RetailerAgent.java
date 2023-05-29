@@ -1,11 +1,10 @@
 package agents;
 
-import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import utils.Location;
-import utils.Task;
+import simulationUtils.Task;
 
 public class RetailerAgent extends BaseAgent {
 

@@ -3,6 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/AgentsInGrid.iml" filepath="$PROJECT_DIR$/AgentsInGrid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Analytics/Analytics.iml" filepath="$PROJECT_DIR$/Analytics/Analytics.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Shared/Shared.iml" filepath="$PROJECT_DIR$/Shared/Shared.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SimulationCore/SimulationCore.iml" filepath="$PROJECT_DIR$/SimulationCore/SimulationCore.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Visualization/Visualization.iml" filepath="$PROJECT_DIR$/Visualization/Visualization.iml" />
     </modules>
   </component>
 </project>

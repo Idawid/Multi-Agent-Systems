@@ -2,6 +2,7 @@ package agents;
 
 import jade.core.Agent;
 import utils.Location;
+import simulationUtils.LocationMapObserver;
 import utils.LocationMap;
 import utils.LocationPin;
 
@@ -18,7 +19,7 @@ public class BaseAgent extends Agent {
 
     protected void init() {
         // Local name is always unique across the Agent subclass
-        LocationMap.addLocationPin(this.getLocalName(), locationPin);
+        LocationMap.getInstance().addLocationPin(this.getLocalName(), locationPin);
         startPositionUpdate();
     }
 
@@ -27,7 +28,7 @@ public class BaseAgent extends Agent {
     }
 
     protected void takeDown() {
-        LocationMap.removeLocationPin(this.getLocalName());
+        LocationMap.getInstance().removeLocationPin(this.getLocalName());
         stopPositionUpdate();
     }
 
@@ -72,7 +73,7 @@ public class BaseAgent extends Agent {
         updateTimer = new Timer();
         updateTimer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
-                LocationMap.updateLocationPin(BaseAgent.this.getLocalName(), locationPin);
+                LocationMap.getInstance().updateLocationPin(BaseAgent.this.getLocalName(), locationPin);
             }
         }, 0, 1000); // Update every 1 seconds (adjust as needed)
     }

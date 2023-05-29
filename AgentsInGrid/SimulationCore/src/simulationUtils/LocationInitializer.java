@@ -1,4 +1,6 @@
-package utils;
+package simulationUtils;
+
+import utils.Location;
 
 import java.util.ArrayList;
 import java.util.List;
