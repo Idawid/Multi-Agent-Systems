@@ -3,14 +3,18 @@ package agents;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
+import utils.AgentType;
+import utils.AgentTypeProvider;
 import utils.Location;
 import simulationUtils.Task;
 
-public class RetailerAgent extends BaseAgent {
+public class RetailerAgent extends BaseAgent implements AgentTypeProvider {
 
     public RetailerAgent(Location location) {
         super(location);
     }
+
+    public RetailerAgent() { }
 
     protected void setup() {
         super.setup();
@@ -38,6 +42,11 @@ public class RetailerAgent extends BaseAgent {
                 }
             }
         });
+    }
+
+    @Override
+    public AgentType getAgentType() {
+        return AgentType.AGENT_RETAILER;
     }
 }
 

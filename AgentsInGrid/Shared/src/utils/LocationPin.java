@@ -25,11 +25,6 @@ public class LocationPin extends Location {
         this.agentType = agentType;
     }
 
-    public Class<? extends Agent> getAgentClass() {
-        // I really want to bind the type with the class
-        return agentType.getAgentClass();
-    }
-
     public AgentType getAgentType() {
         return agentType;
     }

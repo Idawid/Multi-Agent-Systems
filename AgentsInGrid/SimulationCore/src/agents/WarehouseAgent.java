@@ -2,6 +2,8 @@ package agents;
 
 import jade.core.Agent;
 import jade.core.behaviours.TickerBehaviour;
+import utils.AgentType;
+import utils.AgentTypeProvider;
 import utils.Location;
 import simulationUtils.Task;
 import simulationUtils.TaskAllocator;
@@ -9,7 +11,7 @@ import simulationUtils.TaskAllocator;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WarehouseAgent extends Agent {
+public class WarehouseAgent extends Agent implements AgentTypeProvider {
     private List<TruckAgent> trucks;
     private List<Task> tasks;
     private Location location;
@@ -18,6 +20,9 @@ public class WarehouseAgent extends Agent {
         this.location = location;
         this.trucks = trucks;
     }
+
+    public WarehouseAgent() { }
+
     protected void setup() {
         this.trucks = new ArrayList<>();
         this.tasks = new ArrayList<>();
@@ -42,5 +47,10 @@ public class WarehouseAgent extends Agent {
 
     public void addTruck(TruckAgent truck) {
         trucks.add(truck);
+    }
+
+    @Override
+    public AgentType getAgentType() {
+        return AgentType.AGENT_WAREHOUSE;
     }
 }

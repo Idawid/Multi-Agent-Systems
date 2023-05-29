@@ -1,21 +1,21 @@
 package agents;
 
 import jade.core.Agent;
-import utils.Location;
+import utils.*;
 import simulationUtils.LocationMapObserver;
-import utils.LocationMap;
-import utils.LocationPin;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class BaseAgent extends Agent {
+public class BaseAgent extends Agent implements AgentTypeProvider {
     private LocationPin locationPin;
     private Timer updateTimer;
 
     public BaseAgent(Location location) {
         this.locationPin = new LocationPin(location, this.getClass());
     }
+
+    public BaseAgent() { super(); }
 
     protected void init() {
         // Local name is always unique across the Agent subclass
@@ -82,5 +82,10 @@ public class BaseAgent extends Agent {
         if (updateTimer != null) {
             updateTimer.cancel();
         }
+    }
+
+    @Override
+    public AgentType getAgentType() {
+        return null;
     }
 }
