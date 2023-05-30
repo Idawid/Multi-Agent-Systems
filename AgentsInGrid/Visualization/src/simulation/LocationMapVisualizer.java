@@ -1,9 +1,6 @@
 package simulation;
 
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableMap;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -11,19 +8,22 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
-import utils.Constants;
+import utils.LocationMap;
 import utils.LocationPin;
 
+import java.util.HashMap;
 import java.util.Map;
 
-public class LocationMapVisualizer extends Application {
-    private static final int MAP_WIDTH = Constants.MAP_BOUND_X;
-    private static final int MAP_HEIGHT = Constants.MAP_BOUND_Y;
+public class LocationMapVisualizer extends Application implements LocationMap.Observer {
+
+    private static final int MAP_WIDTH = LocationMap.getInstance().getMapBoundX();
+    private static final int MAP_HEIGHT = LocationMap.getInstance().getMapBoundY();
     private static final int PIN_RADIUS = 5;
     private static final int GRID_SIZE = 20;
+
+    private Map<String, LocationPin> locationPins = new HashMap<>();
     private Pane root;
 
-    private static ObservableMap<String, LocationPin> locationPins;
 
     @Override
     public void start(Stage primaryStage) {
@@ -39,7 +39,7 @@ public class LocationMapVisualizer extends Application {
         scene.setFill(Color.LIGHTGRAY);
 
         primaryStage.setTitle("Location Map Visualizer");
-        primaryStage.setScene(sce   ne);
+        primaryStage.setScene(scene);
         primaryStage.setMinWidth(MAP_WIDTH);
         primaryStage.setMaxWidth(MAP_WIDTH);
         primaryStage.setMinHeight(MAP_HEIGHT);
@@ -47,7 +47,8 @@ public class LocationMapVisualizer extends Application {
 
         primaryStage.show();
 
-        refreshVisualization();
+        initLocationPins();
+        LocationMap.getInstance().addObserver(this);
     }
 
     private void drawGrid(GraphicsContext gc) {
@@ -63,15 +64,8 @@ public class LocationMapVisualizer extends Application {
         }
     }
 
-    public void initLocationPins(Map<String, LocationPin> locationPins) {
-        this.locationPins = FXCollections.observableMap(locationPins);
-        this.locationPins.addListener((MapChangeListener<String, LocationPin>) change -> {
-            if (change.wasAdded()) {
-                addPin(change.getValueAdded());
-            } else if (change.wasRemoved()) {
-                removePin(change.getValueRemoved());
-            }
-        });
+    public void initLocationPins() {
+        this.locationPins = new HashMap<>(LocationMap.getInstance().getLocationPins());
         refreshVisualization();
     }
 
@@ -79,7 +73,7 @@ public class LocationMapVisualizer extends Application {
         if(root == null) {
             return;
         }
-        //root.getChildren().clear();
+        removeAllCircles();
         for (LocationPin pin : locationPins.values()) {
             addPin(pin);
         }
@@ -101,16 +95,22 @@ public class LocationMapVisualizer extends Application {
                 node instanceof Circle && ((Circle) node).getCenterX() == pin.getX() &&
                         ((Circle) node).getCenterY() == pin.getY());
     }
-    public static void startVisualization() {
+
+    private void removeAllCircles() {
+        if (root == null) {
+            return;
+        }
+        root.getChildren().removeIf(Circle.class::isInstance);
+    }
+
+    public static void main(String[] args) {
         Thread javafxThread = new Thread(() -> Application.launch(LocationMapVisualizer.class));
         javafxThread.start();
     }
 
-    public static ObservableMap<String, LocationPin> getLocationPins() {
-        return locationPins;
-    }
-
-    public static void setLocationPins(ObservableMap<String, LocationPin> locationPins) {
-        LocationMapVisualizer.locationPins = locationPins;
+    @Override
+    public void update(LocationMap locationMap) {
+        this.locationPins = new HashMap<>(locationMap.getLocationPins());
+        refreshVisualization();
     }
 }
