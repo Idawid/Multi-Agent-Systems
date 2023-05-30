@@ -32,7 +32,6 @@ build/
 log/
 
 # JADE generated files
-bin/
 
 # JADE temporary files
 .tmp/
