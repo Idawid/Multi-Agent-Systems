@@ -7,6 +7,7 @@ import simulationUtils.LocationInitializer;
 import simulationUtils.LocationMapObserver;
 import utils.Location;
 import utils.LocationMap;
+import utils.MapConfig;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,16 +22,16 @@ public class CoreEntry {
         LocationMapObserver map = new LocationMapObserver(LocationMap.getInstance());
 
         // Load the locations for different retailers
-        List<Location> retailerLocations = LocationInitializer.generateRandomLocations(3, 0, 100, 0, 100);
+        List<Location> retailerLocations = LocationInitializer.generateRandomLocations(3, 0, MapConfig.MAP_BOUND_X, 0, MapConfig.MAP_BOUND_Y);
         RetailerContainer retailerContainer = new RetailerContainer(Constants.CONTAINER_RETAIL, retailerLocations);
 
         // Load the locations for different warehouses
-        List<Location> warehouseLocations1 = LocationInitializer.generateRandomLocations(2, 0, 100, 0, 100);
+        List<Location> warehouseLocations1 = LocationInitializer.generateRandomLocations(2, 0, MapConfig.MAP_BOUND_X, 0, MapConfig.MAP_BOUND_Y);
         List<Location> truckLocations1 = new ArrayList<>();
         truckLocations1.addAll(Collections.nCopies(2, warehouseLocations1.get(0)));
         truckLocations1.addAll(Collections.nCopies(1, warehouseLocations1.get(1)));
 
-        LocationInitializer.generateRandomLocations(5, 0, 100, 0, 100);
+        LocationInitializer.generateRandomLocations(5, 0, MapConfig.MAP_BOUND_X, 0, MapConfig.MAP_BOUND_Y);
         WarehouseContainer warehouseContainer1 = new WarehouseContainer(Constants.CONTAINER_WAREHOUSE_PREFIX, 1, warehouseLocations1, truckLocations1);
     }
 }

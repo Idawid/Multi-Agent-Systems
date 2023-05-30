@@ -104,8 +104,9 @@ public class LocationMapVisualizer extends Application implements LocationMap.Ob
     }
 
     public static void main(String[] args) {
-        Thread javafxThread = new Thread(() -> Application.launch(LocationMapVisualizer.class));
-        javafxThread.start();
+        Stage secondStage = new Stage();
+        LocationMapVisualizer app = new LocationMapVisualizer();
+        app.start(secondStage);
     }
 
     @Override
