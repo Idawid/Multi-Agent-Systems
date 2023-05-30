@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class AgentSystem {
+public class CoreEntry {
     public static void main(String[] args) {
         // Initialize the main container, it's always required
         containers.MainContainer mainContainer = new MainContainer(Constants.CONTAINER_MAIN);
@@ -32,10 +32,5 @@ public class AgentSystem {
 
         LocationInitializer.generateRandomLocations(5, 0, 100, 0, 100);
         WarehouseContainer warehouseContainer1 = new WarehouseContainer(Constants.CONTAINER_WAREHOUSE_PREFIX, 1, warehouseLocations1, truckLocations1);
-
-//        LocationMapVisualizer visualizer = new LocationMapVisualizer();
-//        visualizer.initLocationPins(utils.LocationMap.getLocationPins());
-//        LocationMapVisualizer.startVisualization();
-//        visualizer.initLocationPins(utils.LocationMap.getLocationPins());
     }
 }
