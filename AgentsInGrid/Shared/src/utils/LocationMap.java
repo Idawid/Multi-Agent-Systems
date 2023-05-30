@@ -8,7 +8,7 @@ import java.util.Map;
 public class LocationMap {
     private int mapBoundX;
     private int mapBoundY;
-    private Map<String, LocationPin> locationPins;
+    private volatile Map<String, LocationPin> locationPins;
 
     // Singleton instance
     private static LocationMap instance;
@@ -42,19 +42,19 @@ public class LocationMap {
         return locationPins.get(agentName);
     }
 
-    public void addLocationPin(String agentName, LocationPin pin) {
+    public synchronized void addLocationPin(String agentName, LocationPin pin) {
         locationPins.put(agentName, pin);
         // Notify observers about the change in locationPins
         notifyObservers();
     }
 
-    public void removeLocationPin(String agentName) {
+    public synchronized void removeLocationPin(String agentName) {
         locationPins.remove(agentName);
         // Notify observers about the change in locationPins
         notifyObservers();
     }
 
-    public void updateLocationPin(String agentName, LocationPin pin) {
+    public synchronized void updateLocationPin(String agentName, LocationPin pin) {
         // Map.put() updates the records too
         locationPins.put(agentName, pin);
         notifyObservers();
