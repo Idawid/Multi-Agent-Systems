@@ -21,7 +21,7 @@ public class RetailerContainer {
         Runtime rt = Runtime.instance();
         Profile p = new ProfileImpl();
         p.setParameter(Profile.MAIN_HOST, "localhost");
-        p.setParameter(Profile.MAIN_PORT, "1099");
+        p.setParameter(Profile.MAIN_PORT, "1098");
         p.setParameter(Profile.CONTAINER_NAME, containerName);
         p.setParameter(Profile.GUI, "true");
         retailerContainer = rt.createAgentContainer(p);

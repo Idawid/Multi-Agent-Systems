@@ -2,12 +2,12 @@ package agents;
 
 import jade.core.Agent;
 import utils.*;
-import simulationUtils.LocationMapObserver;
-
+import java.rmi.Naming;
+import java.rmi.RemoteException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class BaseAgent extends Agent implements AgentTypeProvider {
+public class BaseAgent extends Agent implements AgentTypeProvider, LocationMap.LocationMapObserver {
     private LocationPin locationPin;
     private Timer updateTimer;
 
@@ -18,9 +18,15 @@ public class BaseAgent extends Agent implements AgentTypeProvider {
     public BaseAgent() { super(); }
 
     protected void init() {
-        // Local name is always unique across the Agent subclass
-        LocationMap.getInstance().addLocationPin(this.getLocalName(), locationPin);
-        startPositionUpdate();
+        try {
+            // Local name is always unique across the Agent subclass
+            LocationMap locationMap = (LocationMap) Naming.lookup("rmi://localhost/locationMap");
+            locationMap.addLocationPin(this.getLocalName(), locationPin);
+            locationMap.registerObserver(this);
+            startPositionUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     protected void setup() {
@@ -28,8 +34,14 @@ public class BaseAgent extends Agent implements AgentTypeProvider {
     }
 
     protected void takeDown() {
-        LocationMap.getInstance().removeLocationPin(this.getLocalName());
-        stopPositionUpdate();
+        try {
+            LocationMap locationMap = (LocationMap) Naming.lookup("rmi://localhost/locationMap");
+            locationMap.removeLocationPin(this.getLocalName());
+            locationMap.unregisterObserver(this);
+            stopPositionUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     // Position is continuously updated in the background.
@@ -73,7 +85,12 @@ public class BaseAgent extends Agent implements AgentTypeProvider {
         updateTimer = new Timer();
         updateTimer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
-                LocationMap.getInstance().updateLocationPin(BaseAgent.this.getLocalName(), locationPin);
+                try {
+                    LocationMap locationMap = (LocationMap) Naming.lookup("rmi://localhost/locationMap");
+                    locationMap.updateLocationPin(BaseAgent.this.getLocalName(), locationPin);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }, 0, 1000); // Update every 1 seconds (adjust as needed)
     }
@@ -87,5 +104,10 @@ public class BaseAgent extends Agent implements AgentTypeProvider {
     @Override
     public AgentType getAgentType() {
         return null;
+    }
+
+    @Override
+    public void locationUpdated(String agentName, LocationPin newLocationPin) throws RemoteException {
+
     }
 }

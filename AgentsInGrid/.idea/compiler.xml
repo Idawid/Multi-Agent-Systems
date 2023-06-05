@@ -3,8 +3,9 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="AgentsInGrid" options="--add-modules java.base" />
-      <module name="Shared" options="--add-modules java.base" />
-      <module name="SimulationCore" options="--add-modules java.base" />
+      <module name="Shared" options="--add-modules java.base,java.rmi" />
+      <module name="SimulationCore" options="--add-modules java.base,java.rmi" />
+      <module name="Visualization" options="--add-modules java.base" />
     </option>
   </component>
 </project>

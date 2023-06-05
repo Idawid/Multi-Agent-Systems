@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="AgentSystems01" type="Application" factoryName="Application">
-    <option name="MAIN_CLASS_NAME" value="AgentSystem" />
+  <configuration default="false" name="Simulation" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="CoreEntry" />
     <module name="SimulationCore" />
     <option name="VM_PARAMETERS" value="--module-path &quot;$PROJECT_DIR$/../AgentsInGrid\libs\javafx\lib&quot; --add-modules=javafx.base,javafx.controls,javafx.graphics,javafx.media" />
     <method v="2">
