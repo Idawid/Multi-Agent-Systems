@@ -2,7 +2,11 @@ package utils;
 
 import jade.core.Agent;
 
-public class LocationPin extends Location {
+import java.io.Serial;
+import java.io.Serializable;
+import java.rmi.Remote;
+
+public class LocationPin extends Location implements Serializable {
     private AgentType agentType;
 
     public LocationPin(int x, int y, Class<? extends Agent> agentClass) {

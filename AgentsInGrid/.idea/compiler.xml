@@ -5,7 +5,7 @@
       <module name="AgentsInGrid" options="--add-modules java.base" />
       <module name="Shared" options="--add-modules java.base,java.rmi" />
       <module name="SimulationCore" options="--add-modules java.base,java.rmi" />
-      <module name="Visualization" options="--add-modules java.base" />
+      <module name="Visualization" options="--add-modules java.base,java.rmi" />
     </option>
   </component>
 </project>

@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Visualization" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="simulation.LocationMapVisualizer" />
+    <module name="Visualization" />
+    <option name="VM_PARAMETERS" value="--module-path &quot;$PROJECT_DIR$/../AgentsInGrid\libs\javafx\lib&quot; --add-modules=javafx.base,javafx.controls,javafx.graphics,javafx.media" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

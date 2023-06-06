@@ -2,7 +2,7 @@
   <configuration default="false" name="Simulation" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="CoreEntry" />
     <module name="SimulationCore" />
-    <option name="VM_PARAMETERS" value="--module-path &quot;$PROJECT_DIR$/../AgentsInGrid\libs\javafx\lib&quot; --add-modules=javafx.base,javafx.controls,javafx.graphics,javafx.media" />
+    <option name="VM_PARAMETERS" value="-Djava.security.policy=$PROJECT_DIR$/Shared/policyfile.policy -Djava.rmi.server.codebase=file:/$PROJECT_DIR$/" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

@@ -31,6 +31,8 @@ public class TruckAgent extends Agent implements AgentTypeProvider {
     public TruckAgent() { }
 
     protected void setup() {
+        super.setup();
+
         warehouseAgent = AgentFinder.findAgentsByType(this, "WarehouseAgent")[0];
 
         addBehaviour(new CyclicBehaviour(this) {

@@ -1,5 +1,6 @@
 package utils;
 
+import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -20,7 +21,4 @@ public interface LocationMap extends Remote {
 
     void registerObserver(LocationMapObserver observer) throws RemoteException;
     void unregisterObserver(LocationMapObserver observer) throws RemoteException;
-    public interface LocationMapObserver extends Remote {
-        void locationUpdated(String agentName, LocationPin newLocationPin) throws RemoteException;
-    }
 }

@@ -24,6 +24,8 @@ public class WarehouseAgent extends Agent implements AgentTypeProvider {
     public WarehouseAgent() { }
 
     protected void setup() {
+        super.setup();
+
         this.trucks = new ArrayList<>();
         this.tasks = new ArrayList<>();
 

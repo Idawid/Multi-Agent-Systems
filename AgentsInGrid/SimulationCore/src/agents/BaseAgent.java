@@ -2,12 +2,16 @@ package agents;
 
 import jade.core.Agent;
 import utils.*;
+
+import java.io.Serializable;
 import java.rmi.Naming;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class BaseAgent extends Agent implements AgentTypeProvider, LocationMap.LocationMapObserver {
+public class BaseAgent extends Agent implements AgentTypeProvider, LocationMapObserver, Remote, Serializable {
     private LocationPin locationPin;
     private Timer updateTimer;
 
@@ -38,10 +42,10 @@ public class BaseAgent extends Agent implements AgentTypeProvider, LocationMap.L
             LocationMap locationMap = (LocationMap) Naming.lookup("rmi://localhost/locationMap");
             locationMap.removeLocationPin(this.getLocalName());
             locationMap.unregisterObserver(this);
-            stopPositionUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        stopPositionUpdate();
     }
 
     // Position is continuously updated in the background.
@@ -106,7 +110,6 @@ public class BaseAgent extends Agent implements AgentTypeProvider, LocationMap.L
         return null;
     }
 
-    @Override
     public void locationUpdated(String agentName, LocationPin newLocationPin) throws RemoteException {
 
     }
