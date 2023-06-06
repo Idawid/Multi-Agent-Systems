@@ -18,13 +18,12 @@ public class WarehouseContainer {
     private static int idWarehouseCounter = 0;
     private static int idTruckCounter = 0;
     private ContainerController warehouseContainer;
-    public WarehouseContainer(String containerName, int containerId, List<Location> warehouseLocations,List<Location> truckLocations) {
+    public WarehouseContainer(String containerName, int containerId, List<Location> warehouseLocations, List<Location> truckLocations) {
         Runtime rt = Runtime.instance();
         Profile p = new ProfileImpl();
         p.setParameter(Profile.MAIN_HOST, "localhost");
         p.setParameter(Profile.MAIN_PORT, "1098");
         p.setParameter(Profile.CONTAINER_NAME, containerName + containerId);
-        p.setParameter(Profile.GUI, "true");
         warehouseContainer = rt.createAgentContainer(p);
 
         // Trucks

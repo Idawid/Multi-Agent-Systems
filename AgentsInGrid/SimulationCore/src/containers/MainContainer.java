@@ -17,8 +17,8 @@ public class MainContainer {
         Profile p = new ProfileImpl();
         p.setParameter(Profile.MAIN_HOST, "localhost");
         p.setParameter(Profile.MAIN_PORT, "1098");
-        p.setParameter(Profile.GUI, "true");
         p.setParameter(Profile.CONTAINER_NAME, containerName);
+        p.setParameter(Profile.GUI, "true");
         mainContainer = rt.createMainContainer(p);
     }
 

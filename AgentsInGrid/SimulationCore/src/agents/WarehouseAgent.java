@@ -11,14 +11,13 @@ import simulationUtils.TaskAllocator;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WarehouseAgent extends Agent implements AgentTypeProvider {
+public class WarehouseAgent extends BaseAgent implements AgentTypeProvider {
     private List<TruckAgent> trucks;
     private List<Task> tasks;
-    private Location location;
 
     public WarehouseAgent(Location location, List<TruckAgent> trucks) {
-        this.location = location;
-        this.trucks = trucks;
+        super(location);
+        this.trucks =trucks ;
     }
 
     public WarehouseAgent() { }

@@ -40,10 +40,9 @@ public class CoreEntry {
         // Load the locations for different warehouses
         List<Location> warehouseLocations1 = LocationInitializer.generateRandomLocations(2, 0, MapConfig.MAP_BOUND_X, 0, MapConfig.MAP_BOUND_Y);
         List<Location> truckLocations1 = new ArrayList<>();
-        truckLocations1.addAll(Collections.nCopies(2, warehouseLocations1.get(0)));
-        truckLocations1.addAll(Collections.nCopies(1, warehouseLocations1.get(1)));
+        truckLocations1.addAll(Collections.nCopies(2, warehouseLocations1.get(0))); // 2 in warehouse 0
+        truckLocations1.addAll(Collections.nCopies(1, warehouseLocations1.get(1))); // 1 in warehouse 1
 
-        LocationInitializer.generateRandomLocations(5, 0, MapConfig.MAP_BOUND_X, 0, MapConfig.MAP_BOUND_Y);
         WarehouseContainer warehouseContainer1 = new WarehouseContainer(Constants.CONTAINER_WAREHOUSE_PREFIX, 1, warehouseLocations1, truckLocations1);
     }
 }

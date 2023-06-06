@@ -3,7 +3,6 @@ package utils;
 import jade.core.Agent;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
 
 public enum AgentType implements Serializable {
     AGENT_RETAILER,

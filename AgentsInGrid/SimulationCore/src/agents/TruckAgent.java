@@ -17,14 +17,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TruckAgent extends Agent implements AgentTypeProvider {
+public class TruckAgent extends BaseAgent implements AgentTypeProvider {
     private AID warehouseAgent;
     private Task currentTask = null;
-    private Location location;
     private List<Integer> pastDeliveryTimes;
 
     public TruckAgent(Location location) {
-        this.location = location;
+        super(location);
         this.pastDeliveryTimes = new ArrayList<>();
     }
 
@@ -71,10 +70,6 @@ public class TruckAgent extends Agent implements AgentTypeProvider {
                 }
             });
         }
-    }
-
-    public Location getLocation() {
-        return location;
     }
 
     public void assignTask(Task task) {

@@ -11,19 +11,21 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class BaseAgent extends Agent implements AgentTypeProvider, LocationMapObserver, Remote, Serializable {
+public class BaseAgent extends Agent implements AgentTypeProvider, LocationMapObserver {
     private LocationPin locationPin;
     private Timer updateTimer;
 
     public BaseAgent(Location location) {
+        super();
         this.locationPin = new LocationPin(location, this.getClass());
     }
 
-    public BaseAgent() { super(); }
+    public BaseAgent() {
+        super();
+    }
 
     protected void init() {
         try {
-            // Local name is always unique across the Agent subclass
             LocationMap locationMap = (LocationMap) Naming.lookup("rmi://localhost/locationMap");
             locationMap.addLocationPin(this.getLocalName(), locationPin);
             locationMap.registerObserver(new LocationMapObserverProxy(this));
