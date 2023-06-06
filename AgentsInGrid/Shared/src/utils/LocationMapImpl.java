@@ -56,7 +56,9 @@ public class LocationMapImpl extends UnicastRemoteObject implements LocationMap 
     }
 
     private void notifyObservers(String agentName, LocationPin newLocationPin) {
-        for (LocationMapObserver observer : observers) {
+        List<LocationMapObserver> observersCopy = new ArrayList<>(observers);
+
+        for (LocationMapObserver observer : observersCopy) {
             try {
                 observer.locationUpdated(agentName, newLocationPin);
             } catch (RemoteException e) {

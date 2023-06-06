@@ -1,25 +1,26 @@
 package simulationUtils;
 
 import agents.RetailerAgent;
+import utils.Location;
 
 import java.io.Serializable;
 
 public class Task implements Serializable {
-    private RetailerAgent destination;
+    private Location destination;
     private String product;
     private int quantity;
 
-    public Task(RetailerAgent destination, String product, int quantity) {
+    public Task(Location destination, String product, int quantity) {
         this.destination = destination;
         this.product = product;
         this.quantity = quantity;
     }
 
-    public RetailerAgent getDestination() {
+    public Location getDestination() {
         return destination;
     }
 
-    public void setDestination(RetailerAgent destination) {
+    public void setDestination(Location destination) {
         this.destination = destination;
     }
 

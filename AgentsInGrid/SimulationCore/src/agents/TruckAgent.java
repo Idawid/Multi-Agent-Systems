@@ -28,7 +28,6 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider {
     }
 
     public TruckAgent() { }
-
     protected void setup() {
         super.setup();
 
@@ -78,7 +77,7 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider {
 
     @Override
     public AgentType getAgentType() {
-        return AgentType.AGENT_RETAILER;
+        return AgentType.AGENT_TRUCK;
     }
 }
 

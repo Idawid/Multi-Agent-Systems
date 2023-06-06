@@ -2,6 +2,10 @@ package agents;
 
 import jade.core.Agent;
 import jade.core.behaviours.TickerBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPAException;
 import utils.AgentType;
 import utils.AgentTypeProvider;
 import utils.Location;
@@ -17,7 +21,7 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider {
 
     public WarehouseAgent(Location location, List<TruckAgent> trucks) {
         super(location);
-        this.trucks =trucks ;
+        this.trucks = trucks ;
     }
 
     public WarehouseAgent() { }

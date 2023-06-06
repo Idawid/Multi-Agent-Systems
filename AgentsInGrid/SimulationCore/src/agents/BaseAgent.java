@@ -1,6 +1,10 @@
 package agents;
 
 import jade.core.Agent;
+import jade.domain.DFService;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPAException;
 import utils.*;
 
 import java.io.Serializable;
@@ -25,6 +29,7 @@ public class BaseAgent extends Agent implements AgentTypeProvider, LocationMapOb
     }
 
     protected void init() {
+        registerWithDF();
         try {
             LocationMap locationMap = (LocationMap) Naming.lookup("rmi://localhost/locationMap");
             locationMap.addLocationPin(this.getLocalName(), locationPin);
@@ -40,6 +45,7 @@ public class BaseAgent extends Agent implements AgentTypeProvider, LocationMapOb
     }
 
     protected void takeDown() {
+        deregisterFromDF();
         try {
             LocationMap locationMap = (LocationMap) Naming.lookup("rmi://localhost/locationMap");
             locationMap.removeLocationPin(this.getLocalName());
@@ -48,6 +54,30 @@ public class BaseAgent extends Agent implements AgentTypeProvider, LocationMapOb
             e.printStackTrace();
         }
         stopPositionUpdate();
+    }
+
+    private void registerWithDF() {
+        DFAgentDescription dfd = new DFAgentDescription();
+        dfd.setName(getAID());
+
+        ServiceDescription sd = new ServiceDescription();
+        sd.setType(this.getClass().getSimpleName());
+        sd.setName(getLocalName());
+        dfd.addServices(sd);
+
+        try {
+            DFService.register(this, dfd);
+        } catch (FIPAException fe) {
+            fe.printStackTrace();
+        }
+    }
+
+    private void deregisterFromDF() {
+        try {
+            DFService.deregister(this);
+        } catch (FIPAException fe) {
+            fe.printStackTrace();
+        }
     }
 
     // Position is continuously updated in the background.
@@ -113,6 +143,6 @@ public class BaseAgent extends Agent implements AgentTypeProvider, LocationMapOb
     }
 
     public void locationUpdated(String agentName, LocationPin newLocationPin) throws RemoteException {
-
+        return;
     }
 }
