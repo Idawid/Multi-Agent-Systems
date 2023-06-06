@@ -26,7 +26,7 @@ public class BaseAgent extends Agent implements AgentTypeProvider, LocationMapOb
             // Local name is always unique across the Agent subclass
             LocationMap locationMap = (LocationMap) Naming.lookup("rmi://localhost/locationMap");
             locationMap.addLocationPin(this.getLocalName(), locationPin);
-            locationMap.registerObserver(this);
+            locationMap.registerObserver(new LocationMapObserverProxy(this));
             startPositionUpdate();
         } catch (Exception e) {
             e.printStackTrace();
@@ -41,7 +41,7 @@ public class BaseAgent extends Agent implements AgentTypeProvider, LocationMapOb
         try {
             LocationMap locationMap = (LocationMap) Naming.lookup("rmi://localhost/locationMap");
             locationMap.removeLocationPin(this.getLocalName());
-            locationMap.unregisterObserver(this);
+            locationMap.unregisterObserver(new LocationMapObserverProxy(this));
         } catch (Exception e) {
             e.printStackTrace();
         }

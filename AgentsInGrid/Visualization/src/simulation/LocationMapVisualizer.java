@@ -37,8 +37,7 @@ public class LocationMapVisualizer extends Application implements LocationMapObs
         try {
             locationMap = (LocationMap) Naming.lookup("rmi://localhost/locationMap");
             UnicastRemoteObject.exportObject(locationMap, 0);
-            LocationMapObserverProxy proxy = new LocationMapObserverProxy(this);
-            locationMap.registerObserver(proxy);
+            locationMap.registerObserver(new LocationMapObserverProxy(this));
         } catch (Exception e) {
             e.printStackTrace();
             Platform.exit();
