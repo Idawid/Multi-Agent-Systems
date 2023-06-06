@@ -1,4 +1,4 @@
-package utils;
+package mapUtils;
 
 import jade.core.Agent;
 

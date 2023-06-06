@@ -1,14 +1,9 @@
 package agents;
 
-import jade.core.Agent;
 import jade.core.behaviours.TickerBehaviour;
-import jade.domain.DFService;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAException;
-import utils.AgentType;
-import utils.AgentTypeProvider;
-import utils.Location;
+import mapUtils.AgentType;
+import mapUtils.AgentTypeProvider;
+import mapUtils.Location;
 import simulationUtils.Task;
 import simulationUtils.TaskAllocator;
 

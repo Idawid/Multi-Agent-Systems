@@ -1,16 +1,15 @@
 package agents;
 
 import jade.core.AID;
-import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import simulationUtils.AgentFinder;
 import simulationUtils.DeliveryTimeEstimator;
-import utils.AgentType;
-import utils.AgentTypeProvider;
-import utils.Location;
+import mapUtils.AgentType;
+import mapUtils.AgentTypeProvider;
+import mapUtils.Location;
 import simulationUtils.Task;
 
 import java.io.IOException;

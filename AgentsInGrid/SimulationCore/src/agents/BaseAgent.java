@@ -5,13 +5,10 @@ import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
-import utils.*;
+import mapUtils.*;
 
-import java.io.Serializable;
 import java.rmi.Naming;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -135,6 +132,14 @@ public class BaseAgent extends Agent implements AgentTypeProvider, LocationMapOb
         if (updateTimer != null) {
             updateTimer.cancel();
         }
+    }
+
+    public LocationPin getLocationPin() {
+        return locationPin;
+    }
+
+    public void setLocationPin(LocationPin locationPin) {
+        this.locationPin = locationPin;
     }
 
     @Override

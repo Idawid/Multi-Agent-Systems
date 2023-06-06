@@ -1,4 +1,4 @@
-package utils;
+package mapUtils;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;

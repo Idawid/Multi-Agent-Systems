@@ -1,4 +1,4 @@
-package utils;
+package mapUtils;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

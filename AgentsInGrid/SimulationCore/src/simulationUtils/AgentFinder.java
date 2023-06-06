@@ -18,11 +18,11 @@ public class AgentFinder {
 
         try {
             DFAgentDescription[] result = DFService.search(agent, template);
-            return Arrays.stream(result).map(DFAgentDescription::getName).toArray(AID[]::new);
+            return Arrays.stream(result)
+                    .map(DFAgentDescription::getName)
+                    .toArray(AID[]::new);
         } catch (FIPAException e) {
             e.printStackTrace();
-
-
             return new AID[0];
         }
     }

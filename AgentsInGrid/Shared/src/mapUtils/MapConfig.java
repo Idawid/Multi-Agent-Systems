@@ -1,4 +1,4 @@
-package utils;
+package mapUtils;
 
 public class MapConfig {
     public static final int MAP_BOUND_X = 1000;

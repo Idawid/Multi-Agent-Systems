@@ -1,4 +1,4 @@
-package utils;
+package mapUtils;
 
 import java.io.Serializable;
 
@@ -42,5 +42,9 @@ public class Location implements Serializable {
     public void setLocation(Location location) {
         this.x = location.getX();
         this.y = location.getY();
+    }
+
+    public Location getLocation() {
+        return this;
     }
 }

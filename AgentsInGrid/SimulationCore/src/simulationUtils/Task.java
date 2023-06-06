@@ -1,16 +1,15 @@
 package simulationUtils;
 
-import agents.RetailerAgent;
-import utils.Location;
+import mapUtils.Location;
 
 import java.io.Serializable;
 
 public class Task implements Serializable {
     private Location destination;
-    private String product;
+    private ProductType product;
     private int quantity;
 
-    public Task(Location destination, String product, int quantity) {
+    public Task(Location destination, ProductType product, int quantity) {
         this.destination = destination;
         this.product = product;
         this.quantity = quantity;
@@ -24,11 +23,11 @@ public class Task implements Serializable {
         this.destination = destination;
     }
 
-    public String getProduct() {
+    public ProductType getProduct() {
         return product;
     }
 
-    public void setProduct(String product) {
+    public void setProduct(ProductType product) {
         this.product = product;
     }
 

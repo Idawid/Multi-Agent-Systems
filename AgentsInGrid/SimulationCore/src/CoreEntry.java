@@ -3,14 +3,11 @@ import containers.RetailerContainer;
 import containers.WarehouseContainer;
 //import simulation.LocationMapVisualizer;
 import simulationUtils.Constants;
-import simulationUtils.LocationInitializer;
-import utils.*;
+import simulationUtils.generators.LocationInitializer;
+import mapUtils.*;
 
 import java.rmi.Naming;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.server.RMIServerSocketFactory;
-import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Collections;
