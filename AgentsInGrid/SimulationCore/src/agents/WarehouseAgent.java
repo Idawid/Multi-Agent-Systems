@@ -11,12 +11,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WarehouseAgent extends BaseAgent implements AgentTypeProvider {
+    // TODO handle delivery Tasks from MainHub:
+    //  - match msg of id Constants.MSG_ID_DELIVERY_INFORM
+    //  - assign received tasks further to TruckAgent's
+
+    // TODO handle multiple delivery Tasks
+    //  - round robin strategy to assign them to TruckAgent's
     private List<TruckAgent> trucks;
     private List<Task> tasks;
 
     public WarehouseAgent(Location location, List<TruckAgent> trucks) {
         super(location);
-        this.trucks = trucks ;
+        this.trucks = trucks;
     }
 
     public WarehouseAgent() { }

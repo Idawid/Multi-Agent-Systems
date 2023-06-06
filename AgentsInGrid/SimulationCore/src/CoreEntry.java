@@ -1,8 +1,8 @@
+import agents.MainHub;
 import containers.MainContainer;
 import containers.RetailerContainer;
 import containers.WarehouseContainer;
 //import simulation.LocationMapVisualizer;
-import simulationUtils.Constants;
 import simulationUtils.generators.LocationInitializer;
 import mapUtils.*;
 
@@ -12,6 +12,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static simulationUtils.Constants.*;
 
 public class CoreEntry {
     public static void main(String[] args) {
@@ -28,11 +30,13 @@ public class CoreEntry {
         }
 
         // Initialize the main container, it's always required
-        containers.MainContainer mainContainer = new MainContainer(Constants.CONTAINER_MAIN);
+        containers.MainContainer mainContainer = new MainContainer(CONTAINER_MAIN);
+        Location mainHubLocation = LocationInitializer.generateRandomLocations(1, 0, MapConfig.MAP_BOUND_X, 0, MapConfig.MAP_BOUND_Y).get(0);
+        mainContainer.addAgent(AGENT_MAIN_HUB_PREFIX + "0", new MainHub(mainHubLocation));
 
         // Load the locations for different retailers
         List<Location> retailerLocations = LocationInitializer.generateRandomLocations(3, 0, MapConfig.MAP_BOUND_X, 0, MapConfig.MAP_BOUND_Y);
-        RetailerContainer retailerContainer = new RetailerContainer(Constants.CONTAINER_RETAIL, retailerLocations);
+        RetailerContainer retailerContainer = new RetailerContainer(CONTAINER_RETAIL, retailerLocations);
 
         // Load the locations for different warehouses
         List<Location> warehouseLocations1 = LocationInitializer.generateRandomLocations(2, 0, MapConfig.MAP_BOUND_X, 0, MapConfig.MAP_BOUND_Y);
@@ -40,6 +44,6 @@ public class CoreEntry {
         truckLocations1.addAll(Collections.nCopies(2, warehouseLocations1.get(0))); // 2 in warehouse 0
         truckLocations1.addAll(Collections.nCopies(1, warehouseLocations1.get(1))); // 1 in warehouse 1
 
-        WarehouseContainer warehouseContainer1 = new WarehouseContainer(Constants.CONTAINER_WAREHOUSE_PREFIX, 1, warehouseLocations1, truckLocations1);
+        WarehouseContainer warehouseContainer1 = new WarehouseContainer(CONTAINER_WAREHOUSE_PREFIX, 1, warehouseLocations1, truckLocations1);
     }
 }

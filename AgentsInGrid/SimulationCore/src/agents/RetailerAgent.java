@@ -10,13 +10,16 @@ import jade.lang.acl.UnreadableException;
 import mapUtils.AgentType;
 import mapUtils.AgentTypeProvider;
 import mapUtils.Location;
-import simulationUtils.AgentFinder;
+import simulationUtils.Constants;
 import simulationUtils.Task;
 import simulationUtils.generators.OrderGenerator;
 
-import java.io.IOException;
+import java.util.List;
+import java.util.Random;
 
 public class RetailerAgent extends BaseAgent implements AgentTypeProvider {
+    private static final int MIN_DELIVERY_INTERVAL = 5000; // Minimum delivery interval in milliseconds
+    private static final int MAX_DELIVERY_INTERVAL = 15000; // Maximum delivery interval in milliseconds
 
     public RetailerAgent(Location location) {
         super(location);
@@ -33,37 +36,41 @@ public class RetailerAgent extends BaseAgent implements AgentTypeProvider {
 
     private class SendDeliveryRequestBehaviour extends TickerBehaviour {
         public SendDeliveryRequestBehaviour(Agent a) {
-            super(a, 0);
+            super(a, 1);
         }
         public SendDeliveryRequestBehaviour(Agent a, long period) {
             super(a, period);
         }
         @Override
         protected void onTick() {
-            AID[] mainHubAIDs = AgentFinder.findAgentsByType(myAgent, MainHub.class.getSimpleName());
+            List<AID> mainHubAIDs = findAgentsByType(MainHub.class.getSimpleName());
 
-            if (mainHubAIDs.length > 0) {
-                AID mainHubAID = mainHubAIDs[0]; // Assuming only one MainHub agent
-                ACLMessage deliveryRequest = new ACLMessage(ACLMessage.REQUEST);
-                deliveryRequest.setConversationId("delivery-request");
-                deliveryRequest.addReceiver(mainHubAID);
+            try {
+                if (mainHubAIDs != null && mainHubAIDs.size() > 0) {
+                    AID mainHubAID = mainHubAIDs.get(0); // Assuming only one MainHub agent // TODO: check
+                    ACLMessage deliveryRequest = new ACLMessage(ACLMessage.REQUEST);
+                    deliveryRequest.setConversationId(Constants.MSG_ID_DELIVERY_REQUEST);
+                    deliveryRequest.addReceiver(mainHubAID);
 
-                Task request = OrderGenerator.generateRandomOrder(((RetailerAgent)myAgent).getLocationPin().getLocation());
-                try {
+                    Task request = OrderGenerator.generateRandomOrder(((RetailerAgent)myAgent).getLocationPin().getLocation());
                     deliveryRequest.setContentObject(request);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+
+                    send(deliveryRequest);
+                } else {
+                    System.out.println("Main Hub agent not found.");
                 }
-                send(deliveryRequest);
-            } else {
-                System.out.println("Main Hub agent not found.");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
+            // This is absolutely mandatory as the default period is 1 ms
+            reset(getRandomDeliveryInterval());
         }
     }
 
     private class ReceiveDeliveryInstructionsBehaviour extends CyclicBehaviour {
         public void action() {
-            MessageTemplate mt = MessageTemplate.MatchConversationId("delivery-instructions");
+            MessageTemplate mt = MessageTemplate.MatchConversationId(Constants.MSG_ID_DELIVERY_INSTRUCTION);
             ACLMessage deliveryInstructions = receive(mt);
 
             if (deliveryInstructions != null) {
@@ -78,6 +85,10 @@ public class RetailerAgent extends BaseAgent implements AgentTypeProvider {
                 block();
             }
         }
+    }
+
+    private int getRandomDeliveryInterval() {
+        return new Random().nextInt(MAX_DELIVERY_INTERVAL - MIN_DELIVERY_INTERVAL + 1) + MIN_DELIVERY_INTERVAL;
     }
 
     @Override

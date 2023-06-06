@@ -5,7 +5,6 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
-import simulationUtils.AgentFinder;
 import simulationUtils.DeliveryTimeEstimator;
 import mapUtils.AgentType;
 import mapUtils.AgentTypeProvider;
@@ -17,6 +16,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TruckAgent extends BaseAgent implements AgentTypeProvider {
+    // TODO handle delivery Task:
+    //  - performTask should move this agent (BaseAgent has incorrect implementation of move)
+    //  - send msg of id Constants.MSG_ID_DELIVERY_INSTRUCTION to RetailerAgent
+
+    // TODO interrupts:
+    //  - how the move may be interrupted, slowed down
+
+    // TODO statistics:
+    //  - how to gather information about the move, and what can WarehouseAgent do with that (???)
     private AID warehouseAgent;
     private Task currentTask = null;
     private List<Integer> pastDeliveryTimes;
@@ -30,12 +38,15 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider {
     protected void setup() {
         super.setup();
 
-        warehouseAgent = AgentFinder.findAgentsByType(this, "WarehouseAgent")[0];
+        List<AID> warehouseAgentAIDs = findAgentsByType(WarehouseAgent.class.getSimpleName());
+        if (warehouseAgentAIDs != null) {
+            warehouseAgent = warehouseAgentAIDs.get(0);
+        }
 
         addBehaviour(new CyclicBehaviour(this) {
             public void action() {
                 ACLMessage msg = receive();
-                if (msg != null && msg.getSender().equals(warehouseAgent)) {
+                if (msg != null && warehouseAgent != null && msg.getSender().equals(warehouseAgent)) {
                     try {
                         currentTask = (Task) msg.getContentObject();
                         performTask();
