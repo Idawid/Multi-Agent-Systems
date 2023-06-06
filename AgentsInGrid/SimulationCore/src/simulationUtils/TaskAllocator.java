@@ -1,8 +1,6 @@
 package simulationUtils;
 
 import agents.TruckAgent;
-import simulationUtils.Task;
-
 import java.util.List;
 
 public class TaskAllocator {
