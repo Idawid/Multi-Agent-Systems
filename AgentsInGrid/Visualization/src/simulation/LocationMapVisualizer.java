@@ -33,7 +33,7 @@ public class LocationMapVisualizer extends Application implements LocationMapObs
     @Override
     public void start(Stage primaryStage) {
         try {
-            locationMap = (LocationMap) Naming.lookup("rmi://localhost/locationMap");
+            locationMap = (LocationMap) Naming.lookup(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT);
             UnicastRemoteObject.exportObject(locationMap, 0);
             locationMap.registerObserver(new LocationMapObserverProxy(this));
         } catch (Exception e) {

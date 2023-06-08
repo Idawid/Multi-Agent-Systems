@@ -19,13 +19,13 @@ public class MainHub extends BaseAgent implements AgentTypeProvider {
 
     public MainHub(Location location) {
         super(location);
+        assignmentStrategy = new ProximityBasedAssignmentStrategy();
     }
     public MainHub() {
         super();
     }
     protected void setup() {
         super.setup();
-        assignmentStrategy = new ProximityBasedAssignmentStrategy();
         addBehaviour(new ReceiveDeliveryRequestBehaviour());
     }
     private class ReceiveDeliveryRequestBehaviour extends CyclicBehaviour {
@@ -46,7 +46,6 @@ public class MainHub extends BaseAgent implements AgentTypeProvider {
                     deliveryInstruction.setConversationId(Constants.MSG_ID_DELIVERY_INFORM);
                     deliveryInstruction.addReceiver(warehouseAgent);
                     deliveryInstruction.setContentObject(incomingRequest);
-                    System.out.println("MainHub received request: " + incomingRequest.getQuantity());
 
                     send(deliveryInstruction);
                 } catch (Exception e) {

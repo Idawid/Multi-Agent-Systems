@@ -1,5 +1,6 @@
 package agents;
 
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.TickerBehaviour;
@@ -11,8 +12,10 @@ import mapUtils.AgentTypeProvider;
 import mapUtils.Location;
 import simulationUtils.Constants;
 import simulationUtils.Task;
-import simulationUtils.TaskAllocator;
+import simulationUtils.assignmentStrategies.truck.RandomAssignmentStrategy;
+import simulationUtils.assignmentStrategies.truck.TruckAssignmentStrategy;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +25,7 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider {
 
     // TODO handle multiple delivery Tasks
     //  - round robin strategy to assign them to TruckAgent's
+    private TruckAssignmentStrategy assignmentStrategy;
     private List<Task> tasks;
 
     public WarehouseAgent(Location location) {
@@ -34,12 +38,13 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider {
         super.setup();
 
         this.tasks = new ArrayList<>();
+        assignmentStrategy = new RandomAssignmentStrategy();
 
-        addBehaviour(new ReceiveDeliveryRequestBehaviour());
+        addBehaviour(new ReceiveDeliveryInformBehaviour());
         addBehaviour(new AssignTrucksBehavior(this, 1000));
     }
 
-    private class ReceiveDeliveryRequestBehaviour extends CyclicBehaviour {
+    private class ReceiveDeliveryInformBehaviour extends CyclicBehaviour {
         @Override
         public void action() {
             MessageTemplate mt = MessageTemplate.MatchConversationId(Constants.MSG_ID_DELIVERY_INFORM);
@@ -66,19 +71,30 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider {
 
         @Override
         protected void onTick() {
-            assignTasks();
+            if (!tasks.isEmpty()) {
+                Task task = tasks.remove(0); // TODO optimize
+
+                List<TruckAgent> trucks = (List<TruckAgent>) findAgentsByClass(TruckAgent.class);
+
+                if (trucks != null && !trucks.isEmpty()) {
+                    trucks.removeIf(truckAgent -> !truckAgent.getContainerID().equals(((WarehouseAgent) myAgent).getContainerID()));
+                    trucks.removeIf(truckAgent -> truckAgent.getCurrentTask() != null);
+                    AID truckAID = assignmentStrategy.assignTruckAgent(task, trucks);
+
+                    ACLMessage deliveryInstruction = new ACLMessage(ACLMessage.INFORM);
+                    deliveryInstruction.setConversationId(Constants.MSG_ID_DELIVERY_INFORM);
+                    deliveryInstruction.addReceiver(truckAID);
+
+                    try {
+                        deliveryInstruction.setContentObject(task);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    send(deliveryInstruction);
+                }
+            }
         }
-    }
-
-    private void assignTasks() {
-//        if (!tasks.isEmpty() && !trucks.isEmpty()) {
-//            TaskAllocator.assignTasksRoundRobin(tasks, trucks);
-//            tasks.clear();
-//        }
-    }
-
-    public void addTask(Task task) {
-        tasks.add(task);
     }
 
     @Override

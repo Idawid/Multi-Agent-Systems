@@ -10,6 +10,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.util.Logger;
 import mapUtils.*;
 import simulationUtils.Constants;
 
@@ -22,18 +23,20 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 
 public class BaseAgent extends Agent implements LocationMapObserver, Serializable {
-    // TODO needs refactor
-    // TODO move doesn't work :(
-    // TODO this class and all its fields HAVE TO be serializable for setContentObject(this) to work
+
+    private static final long serialVersionUID = 1L;
+    private static final Logger logger = Logger.getMyLogger(BaseAgent.class.getName());
     private LocationPin locationPin;
     private ContainerID containerID;
     private String address;
     private String port;
-    // private Timer updateTimer; // Not serializable - will crash
 
     public BaseAgent(Location location) {
         super();
@@ -51,8 +54,6 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
             registerWithDF();
             registerWithLocationMap();
             initAgentNetworkAttributes();
-
-            // startPositionUpdate();
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
@@ -66,10 +67,9 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
             e.printStackTrace();
             System.exit(1);
         }
-        // stopPositionUpdate();
     }
     private void initAgentNetworkAttributes() {
-        // Attributes are transient
+        // Properties are transient, they have to be pulled up to BaseAgent
         String containerName = this.getProperty("container-name", null);
         String address = this.getProperty("host", null);
         String port = this.getProperty("port", null);
@@ -93,12 +93,12 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
         setAgentNetworkAttributes(targetAgent);
     }
     private void registerWithLocationMap() throws MalformedURLException, NotBoundException, RemoteException {
-        LocationMap locationMap = (LocationMap) Naming.lookup("rmi://localhost/locationMap");
+        LocationMap locationMap = (LocationMap) Naming.lookup(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT);
         locationMap.addLocationPin(this.getLocalName(), locationPin);
         locationMap.registerObserver(new LocationMapObserverProxy(this));
     }
     private void deregisterFromLocationMap() throws MalformedURLException, NotBoundException, RemoteException {
-        LocationMap locationMap = (LocationMap) Naming.lookup("rmi://localhost/locationMap");
+        LocationMap locationMap = (LocationMap) Naming.lookup(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT);
         locationMap.removeLocationPin(this.getLocalName());
         locationMap.unregisterObserver(new LocationMapObserverProxy(this));
     }
@@ -137,8 +137,8 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
                     send(response);
                 } catch (IOException e) {
                     if (e instanceof NotSerializableException) {
-                        System.err.println("\u001B[30;41;2m" + "Object of class " + myAgent.getClass().getSimpleName() +
-                                " is not serializable! Make sure all fields of the object are serializable." + "\u001B[0m");
+                        logger.log(Logger.SEVERE, "Object of class " + myAgent.getClass().getSimpleName() +
+                                "is not serializable! Make sure all fields of the object are serializable.", e);
                     }
                     throw new RuntimeException(e);
                 }
@@ -184,62 +184,33 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
         return null;
     }
 
-    // Position is continuously updated in the background.
-    protected void moveToPosition(Location location, int timeInSeconds) {
+    protected CompletableFuture<Void> moveToPosition(Location targetLocation, int timeInSeconds) {
+        CompletableFuture<Void> completedFuture = new CompletableFuture<>();
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        Runnable task = () -> {
+            int stepX = (int) ((targetLocation.getX() - locationPin.getX()) / (double)timeInSeconds);
+            int stepY = (int) ((targetLocation.getY() - locationPin.getY()) / (double)timeInSeconds);
 
-        double distance = locationPin.getDistance(location);
-        double speed = distance / timeInSeconds;
+            // Update the member location
+            locationPin.setX(locationPin.getX() + stepX);
+            locationPin.setY(locationPin.getY() + stepY);
 
-        // update interval
-        long intervalInMillis = (long) (1000 / speed);
-        double distancePerUpdate = speed * intervalInMillis / 1000;
+            try {
+                // Update the position on the remote map
+                LocationMap locationMap = (LocationMap) Naming.lookup(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT);
+                locationMap.updateLocationPin(getLocalName(), locationPin);
+            } catch (Exception e) { }
+        };
 
-        int numUpdates = (int) (speed / distancePerUpdate);
+        scheduler.scheduleAtFixedRate(task, 0, 1, TimeUnit.SECONDS);
 
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            int updateCount = 0;
+        scheduler.schedule(() -> {
+            scheduler.shutdown();
+            completedFuture.complete(null);
+        }, timeInSeconds, TimeUnit.SECONDS);
 
-            public void run() {
-                if (updateCount >= numUpdates) {
-                    // Stop the timer after reaching the target position
-                    timer.cancel();
-                } else {
-                    // Calculate the new position based on the distance covered per update
-                    double deltaX = (location.getX() - locationPin.getX()) / (double) numUpdates;
-                    double deltaY = (location.getY() - locationPin.getY()) / (double) numUpdates;
-                    Location newLocation = new Location(locationPin.getX() + (int) deltaX, locationPin.getY() + (int) deltaY);
-
-                    // Update the agent's location
-                    locationPin.setLocation(newLocation);
-
-                    //System.out.println(getLocalName() + ": Moving to (" + currentX + ", " + currentY + ")");
-
-                    updateCount++;
-                }
-            }
-        }, intervalInMillis, intervalInMillis);
+        return completedFuture;
     }
-
-//    private void startPositionUpdate() {
-//        updateTimer = new Timer();
-//        updateTimer.scheduleAtFixedRate(new TimerTask() {
-//            public void run() {
-//                try {
-//                    LocationMap locationMap = (LocationMap) Naming.lookup("rmi://localhost/locationMap");
-//                    locationMap.updateLocationPin(BaseAgent.this.getLocalName(), locationPin);
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }, 0, 1000); // Update every 1 seconds (adjust as needed)
-//    }
-//
-//    private void stopPositionUpdate() {
-//        if (updateTimer != null) {
-//            updateTimer.cancel();
-//        }
-//    }
 
     public LocationPin getLocationPin() {
         return locationPin;
@@ -247,6 +218,26 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
 
     public void setLocationPin(LocationPin locationPin) {
         this.locationPin = locationPin;
+    }
+
+    public Location getLocation() {
+        return locationPin;
+    }
+
+    public void setLocation (Location location) {
+        this.locationPin = new LocationPin(location, this.getClass());
+    }
+
+    public ContainerID getContainerID() {
+        return containerID;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public String getPort() {
+        return port;
     }
 
     public void locationUpdated(String agentName, LocationPin newLocationPin) throws RemoteException {

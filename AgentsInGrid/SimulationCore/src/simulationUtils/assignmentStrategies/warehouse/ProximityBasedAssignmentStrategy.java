@@ -11,24 +11,22 @@ import java.util.List;
 public class ProximityBasedAssignmentStrategy implements WarehouseAssignmentStrategy, Serializable {
     @Override
     public AID assignWarehouseAgent(Task task, List<WarehouseAgent> warehouses) {
-        AID closestWarehouseAgent = null;
-
-        try {
-            Location deliveryLocation = task.getDestination();
-            double minDistance = Double.MAX_VALUE;
-
-            for (WarehouseAgent warehouse : warehouses) {
-
-                double distance = warehouse.getLocationPin().getDistance(deliveryLocation);
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    closestWarehouseAgent = warehouse.getAID();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (warehouses == null || warehouses.isEmpty()) {
+            return null; // No available warehouses
         }
 
-        return closestWarehouseAgent;
+        AID assignedWarehouse = null;
+        double shortestDistance = Double.MAX_VALUE;
+        Location deliveryLocation = task.getDestination();
+
+        for (WarehouseAgent warehouse : warehouses) {
+            double distance = warehouse.getLocationPin().getDistance(deliveryLocation);
+            if (distance < shortestDistance) {
+                shortestDistance = distance;
+                assignedWarehouse = warehouse.getAID();
+            }
+        }
+
+        return assignedWarehouse;
     }
 }

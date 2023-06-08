@@ -1,5 +1,6 @@
 package simulationUtils;
 
+import jade.core.AID;
 import mapUtils.Location;
 
 import java.io.Serializable;
@@ -8,11 +9,13 @@ public class Task implements Serializable {
     private Location destination;
     private ProductType product;
     private int quantity;
+    private AID retailerAID;
 
-    public Task(Location destination, ProductType product, int quantity) {
+    public Task(Location destination, ProductType product, int quantity, AID retailerAID) {
         this.destination = destination;
         this.product = product;
         this.quantity = quantity;
+        this.retailerAID = retailerAID;
     }
 
     public Location getDestination() {
@@ -37,5 +40,13 @@ public class Task implements Serializable {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    public AID getRetailerAID() {
+        return retailerAID;
+    }
+
+    public void setRetailerAID(AID retailerAID) {
+        this.retailerAID = retailerAID;
     }
 }

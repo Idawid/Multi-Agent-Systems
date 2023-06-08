@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import java.util.concurrent.ConcurrentMap;
 
 public interface LocationMap extends Remote {
+    public static final String REMOTE_LOCATION_MAP_ENDPOINT = "rmi://localhost/locationMap";
     int getMapBoundX() throws RemoteException;
     int getMapBoundY() throws RemoteException;
     ConcurrentMap<String, LocationPin> getLocationPins() throws RemoteException;

@@ -36,7 +36,7 @@ public class RetailerAgent extends BaseAgent implements AgentTypeProvider {
 
     private class SendDeliveryRequestBehaviour extends TickerBehaviour {
         public SendDeliveryRequestBehaviour(Agent a) {
-            super(a, 1);
+            super(a, 1000);
         }
         public SendDeliveryRequestBehaviour(Agent a, long period) {
             super(a, period);
@@ -52,7 +52,7 @@ public class RetailerAgent extends BaseAgent implements AgentTypeProvider {
                     deliveryRequest.setConversationId(Constants.MSG_ID_DELIVERY_REQUEST);
                     deliveryRequest.addReceiver(mainHubAID);
 
-                    Task request = OrderGenerator.generateRandomOrder(((RetailerAgent)myAgent).getLocationPin().getLocation());
+                    Task request = OrderGenerator.generateRandomOrder(((RetailerAgent)myAgent).getLocation(), myAgent.getAID());
                     deliveryRequest.setContentObject(request);
 
                     send(deliveryRequest);
@@ -63,7 +63,7 @@ public class RetailerAgent extends BaseAgent implements AgentTypeProvider {
                 e.printStackTrace();
             }
 
-            // This is absolutely mandatory as the default period is 1 ms
+            // Randomizes the delivery request intervals
             reset(getRandomDeliveryInterval());
         }
     }

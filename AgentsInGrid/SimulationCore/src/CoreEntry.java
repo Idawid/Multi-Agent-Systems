@@ -24,7 +24,7 @@ public class CoreEntry {
             LocationMap locationMap = new LocationMapImpl();
             UnicastRemoteObject.unexportObject(locationMap, true);
             LocationMap stub = (LocationMap) UnicastRemoteObject.exportObject(locationMap, 0);
-            Naming.rebind("rmi://localhost/locationMap", stub);
+            Naming.rebind(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT, stub);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
