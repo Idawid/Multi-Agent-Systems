@@ -27,6 +27,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class BaseAgent extends Agent implements LocationMapObserver, Serializable {
@@ -159,6 +160,7 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
             DFAgentDescription[] result = DFService.search(this, template);
             for (DFAgentDescription dfd : result) {
                 AID agentAID = dfd.getName();
+                System.out.println("Found: " + result.length + " agents");
                 Object agentInstance = requestAgentInstance(agentAID);
                 if (agentInstance != null && agentClass.isInstance(agentInstance)) {
                     agentInstances.add(agentClass.cast(agentInstance));
@@ -184,32 +186,40 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
         return null;
     }
 
-    protected CompletableFuture<Void> moveToPosition(Location targetLocation, int timeInSeconds) {
-        CompletableFuture<Void> completedFuture = new CompletableFuture<>();
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        Runnable task = () -> {
-            int stepX = (int) ((targetLocation.getX() - locationPin.getX()) / (double)timeInSeconds);
-            int stepY = (int) ((targetLocation.getY() - locationPin.getY()) / (double)timeInSeconds);
+    protected void moveToPosition(Location targetLocation) {
+        LocationPin startLocation = new LocationPin(locationPin);
+        LocationPin tempLocation = new LocationPin(locationPin);
+        String keyName = getLocalName();
 
-            // Update the member location
-            locationPin.setX(locationPin.getX() + stepX);
-            locationPin.setY(locationPin.getY() + stepY);
+        int timeInMilliseconds = (int) (startLocation.getDistance(targetLocation) * 1000) / 60;
+        int totalSteps = timeInMilliseconds * LocationMap.UPDATES_PER_SECOND / 1000 ;
+        int currentSteps = 0;
+        double stepX = ((double) targetLocation.getX() - startLocation.getX()) / totalSteps;
+        double stepY = ((double) targetLocation.getY() - startLocation.getY()) / totalSteps;
+
+        for (int i = 0; i < totalSteps; i++) {
+            tempLocation.setX(startLocation.getX() + (int) (currentSteps * stepX));
+            tempLocation.setY(startLocation.getY() + (int) (currentSteps * stepY));
+            currentSteps++;
+
+            updateLocationPinNonBlocking(keyName, tempLocation);
 
             try {
-                // Update the position on the remote map
+                Thread.sleep(1000 / LocationMap.UPDATES_PER_SECOND);
+            } catch (InterruptedException e) { }
+        }
+        locationPin.setLocation(tempLocation);
+    }
+
+    private void updateLocationPinNonBlocking(String agentName, LocationPin location) {
+        CompletableFuture.runAsync(() -> {
+            try {
                 LocationMap locationMap = (LocationMap) Naming.lookup(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT);
-                locationMap.updateLocationPin(getLocalName(), locationPin);
-            } catch (Exception e) { }
-        };
-
-        scheduler.scheduleAtFixedRate(task, 0, 1, TimeUnit.SECONDS);
-
-        scheduler.schedule(() -> {
-            scheduler.shutdown();
-            completedFuture.complete(null);
-        }, timeInSeconds, TimeUnit.SECONDS);
-
-        return completedFuture;
+                locationMap.updateLocationPin(agentName, location);
+            } catch (Exception e) {
+                logger.log(Logger.WARNING, "Failed to update location on the remote map.");
+            }
+        });
     }
 
     public LocationPin getLocationPin() {

@@ -77,7 +77,8 @@ public class RetailerAgent extends BaseAgent implements AgentTypeProvider {
                 try {
                     Task task = (Task) deliveryInstructions.getContentObject();
                     int quantity = task.getQuantity();
-                    System.out.println("Received delivery instructions with quantity: " + quantity);
+                    System.out.println("Received delivery instructions with quantity: " + quantity + " from "
+                            + deliveryInstructions.getSender().getLocalName());
                 } catch (UnreadableException e) {
                     e.printStackTrace();
                 }

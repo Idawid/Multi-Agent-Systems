@@ -72,10 +72,9 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider {
         @Override
         protected void onTick() {
             if (!tasks.isEmpty()) {
-                Task task = tasks.remove(0); // TODO optimize
+                Task task = tasks.remove(0);
 
                 List<TruckAgent> trucks = (List<TruckAgent>) findAgentsByClass(TruckAgent.class);
-
                 if (trucks != null && !trucks.isEmpty()) {
                     trucks.removeIf(truckAgent -> !truckAgent.getContainerID().equals(((WarehouseAgent) myAgent).getContainerID()));
                     trucks.removeIf(truckAgent -> truckAgent.getCurrentTask() != null);

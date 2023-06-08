@@ -27,6 +27,11 @@ public class LocationPin extends Location implements Serializable {
         this.agentType = agentType;
     }
 
+    public LocationPin(LocationPin locationPin) {
+        super(locationPin.getLocation());
+        this.agentType = locationPin.getAgentType();
+    }
+
     public AgentType getAgentType() {
         return agentType;
     }

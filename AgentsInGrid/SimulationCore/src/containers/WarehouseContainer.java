@@ -28,7 +28,7 @@ public class WarehouseContainer {
 
         // Trucks
         List<TruckAgent> truckAgentList = new ArrayList<>();
-        for (Location location : warehouseLocations) { // Trucks rest in the warehouses
+        for (Location location : truckLocations) { // Trucks rest in the warehouses
             TruckAgent truckAgent = new TruckAgent(location);
             truckAgentList.add(truckAgent);
             addAgent(Constants.AGENT_TRUCK_PREFIX + idTruckCounter, truckAgent);
@@ -36,7 +36,7 @@ public class WarehouseContainer {
         }
 
         // Warehouses
-        for (Location location : truckLocations) {
+        for (Location location : warehouseLocations) {
             WarehouseAgent warehouseAgent = new WarehouseAgent(location);
             addAgent(Constants.AGENT_WAREHOUSE_PREFIX + idWarehouseCounter, warehouseAgent);
             idWarehouseCounter++;

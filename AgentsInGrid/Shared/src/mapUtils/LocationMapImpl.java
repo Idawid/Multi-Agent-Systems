@@ -61,9 +61,7 @@ public class LocationMapImpl extends UnicastRemoteObject implements LocationMap 
         for (LocationMapObserver observer : observersCopy) {
             try {
                 observer.locationUpdated(agentName, newLocationPin);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
+            } catch (Exception e) { }
         }
     }
 
