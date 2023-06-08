@@ -39,15 +39,7 @@ public class MainHub extends BaseAgent implements AgentTypeProvider {
                 try {
                     Task incomingRequest = (Task) deliveryRequest.getContentObject();
 
-                    List<AID> warehouseAIDs = findAgentsByType(WarehouseAgent.class.getSimpleName());
-
-                    List<WarehouseAgent> warehouseAgents = new ArrayList<>();
-                    for (AID warehouseAID : warehouseAIDs) {
-                        WarehouseAgent warehouseAgent = requestAgentInstance(warehouseAID, WarehouseAgent.class);
-                        if (warehouseAgent != null) {
-                            warehouseAgents.add(warehouseAgent);
-                        }
-                    }
+                    List<WarehouseAgent> warehouseAgents = (List<WarehouseAgent>) findAgentsByClass(WarehouseAgent.class);
 
                     AID warehouseAgent = assignmentStrategy.assignWarehouseAgent(incomingRequest, warehouseAgents);
 
@@ -55,7 +47,6 @@ public class MainHub extends BaseAgent implements AgentTypeProvider {
                     deliveryInstruction.setConversationId(Constants.MSG_ID_DELIVERY_INFORM);
                     deliveryInstruction.addReceiver(warehouseAgent);
                     deliveryInstruction.setContentObject(incomingRequest);
-                    // debug // TODO remove once tested
                     System.out.println("MainHub received request: " + incomingRequest.getQuantity());
 
                     send(deliveryInstruction);

@@ -1,9 +1,15 @@
 package agents;
 
+import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.TickerBehaviour;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+import jade.lang.acl.UnreadableException;
 import mapUtils.AgentType;
 import mapUtils.AgentTypeProvider;
 import mapUtils.Location;
+import simulationUtils.Constants;
 import simulationUtils.Task;
 import simulationUtils.TaskAllocator;
 
@@ -17,12 +23,10 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider {
 
     // TODO handle multiple delivery Tasks
     //  - round robin strategy to assign them to TruckAgent's
-    private List<TruckAgent> trucks;
     private List<Task> tasks;
 
-    public WarehouseAgent(Location location, List<TruckAgent> trucks) {
+    public WarehouseAgent(Location location) {
         super(location);
-        this.trucks = trucks;
     }
 
     public WarehouseAgent() { }
@@ -30,29 +34,53 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider {
     protected void setup() {
         super.setup();
 
-        this.trucks = new ArrayList<>();
         this.tasks = new ArrayList<>();
 
-        addBehaviour(new TickerBehaviour(this, 1000) {
-            protected void onTick() {
-                assignTasks();
+        addBehaviour(new ReceiveDeliveryRequestBehaviour());
+        addBehaviour(new AssignTrucksBehavior(this, 1000));
+    }
+
+    private class ReceiveDeliveryRequestBehaviour extends CyclicBehaviour {
+        @Override
+        public void action() {
+            MessageTemplate mt = MessageTemplate.MatchConversationId(Constants.MSG_ID_DELIVERY_INFORM);
+            ACLMessage deliveryRequest = receive(mt);
+
+            if (deliveryRequest != null) {
+                try {
+                    Task task = (Task) deliveryRequest.getContentObject();
+                    tasks.add(task);
+                    System.out.println(task.toString());
+                } catch (UnreadableException e) {
+                    System.out.println("Failed to extract Task object from the received message.");
+                }
+            } else {
+                block();
             }
-        });
+        }
+    }
+
+    private class AssignTrucksBehavior extends TickerBehaviour {
+
+        public AssignTrucksBehavior(Agent a, long period) {
+            super(a, period);
+        }
+
+        @Override
+        protected void onTick() {
+            assignTasks();
+        }
     }
 
     private void assignTasks() {
-        if (!tasks.isEmpty() && !trucks.isEmpty()) {
-            TaskAllocator.assignTasksRoundRobin(tasks, trucks);
-            tasks.clear();
-        }
+//        if (!tasks.isEmpty() && !trucks.isEmpty()) {
+//            TaskAllocator.assignTasksRoundRobin(tasks, trucks);
+//            tasks.clear();
+//        }
     }
 
     public void addTask(Task task) {
         tasks.add(task);
-    }
-
-    public void addTruck(TruckAgent truck) {
-        trucks.add(truck);
     }
 
     @Override

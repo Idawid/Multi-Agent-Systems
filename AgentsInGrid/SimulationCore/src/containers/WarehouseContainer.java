@@ -37,7 +37,7 @@ public class WarehouseContainer {
 
         // Warehouses
         for (Location location : truckLocations) {
-            WarehouseAgent warehouseAgent = new WarehouseAgent(location, truckAgentList);
+            WarehouseAgent warehouseAgent = new WarehouseAgent(location);
             addAgent(Constants.AGENT_WAREHOUSE_PREFIX + idWarehouseCounter, warehouseAgent);
             idWarehouseCounter++;
         }

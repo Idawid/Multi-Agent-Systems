@@ -25,7 +25,6 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider {
 
     // TODO statistics:
     //  - how to gather information about the move, and what can WarehouseAgent do with that (???)
-    private AID warehouseAgent;
     private Task currentTask = null;
     private List<Integer> pastDeliveryTimes;
 
@@ -38,18 +37,15 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider {
     protected void setup() {
         super.setup();
 
-        List<AID> warehouseAgentAIDs = findAgentsByType(WarehouseAgent.class.getSimpleName());
-        if (warehouseAgentAIDs != null) {
-            warehouseAgent = warehouseAgentAIDs.get(0);
-        }
+        List<WarehouseAgent> warehouseAgents = (List<WarehouseAgent>) findAgentsByClass(WarehouseAgent.class);
 
         addBehaviour(new CyclicBehaviour(this) {
             public void action() {
                 ACLMessage msg = receive();
-                if (msg != null && warehouseAgent != null && msg.getSender().equals(warehouseAgent)) {
+                if (msg != null) {
                     try {
                         currentTask = (Task) msg.getContentObject();
-                        performTask();
+                        //performTask();
                     } catch (UnreadableException e) {
                         e.printStackTrace();
                     }
@@ -68,7 +64,7 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider {
                 protected void onWake() {
                     pastDeliveryTimes.add((int) estimatedTime);
                     ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-                    msg.addReceiver(warehouseAgent);
+                    //msg.addReceiver(warehouseAgent);
                     try {
                         msg.setContentObject(currentTask);
                         send(msg);

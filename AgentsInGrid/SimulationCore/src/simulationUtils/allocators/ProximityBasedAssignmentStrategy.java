@@ -3,14 +3,12 @@ package simulationUtils.allocators;
 import agents.WarehouseAgent;
 import jade.core.AID;
 import mapUtils.Location;
-import mapUtils.LocationMap;
-import mapUtils.LocationPin;
 import simulationUtils.Task;
 
-import java.rmi.Naming;
+import java.io.Serializable;
 import java.util.List;
 
-public class ProximityBasedAssignmentStrategy implements WarehouseAssignmentStrategy {
+public class ProximityBasedAssignmentStrategy implements WarehouseAssignmentStrategy, Serializable {
     @Override
     public AID assignWarehouseAgent(Task task, List<WarehouseAgent> warehouses) {
         AID closestWarehouseAgent = null;

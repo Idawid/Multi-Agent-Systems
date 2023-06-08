@@ -13,6 +13,7 @@ import mapUtils.*;
 import simulationUtils.Constants;
 
 import java.io.IOException;
+import java.io.NotSerializableException;
 import java.io.Serializable;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
@@ -93,9 +94,13 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
                     ACLMessage response = new ACLMessage(ACLMessage.INFORM);
                     response.addReceiver(request.getSender());
                     response.setConversationId(Constants.MSG_ID_INSTANCE_INFORM);
-                    response.setContentObject(this);
+                    response.setContentObject(myAgent);
                     send(response);
                 } catch (IOException e) {
+                    if (e instanceof NotSerializableException) {
+                        System.err.println("\u001B[30;41;2m" + "Object of class " + myAgent.getClass().getSimpleName() +
+                                " is not serializable! Make sure all fields of the object are serializable." + "\u001B[0m");
+                    }
                     throw new RuntimeException(e);
                 }
             } else {
@@ -103,7 +108,30 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
             }
         }
     }
-    public <T extends BaseAgent> T requestAgentInstance(AID agentAID, Class<T> agentClass) {
+    public List<? extends BaseAgent> findAgentsByClass(Class<? extends BaseAgent> agentClass) {
+        List<BaseAgent> agentInstances = new ArrayList<>();
+
+        DFAgentDescription template = new DFAgentDescription();
+        ServiceDescription sd = new ServiceDescription();
+        sd.setType(agentClass.getSimpleName());
+        template.addServices(sd);
+
+        try {
+            DFAgentDescription[] result = DFService.search(this, template);
+            for (DFAgentDescription dfd : result) {
+                AID agentAID = dfd.getName();
+                Object agentInstance = requestAgentInstance(agentAID);
+                if (agentInstance != null && agentClass.isInstance(agentInstance)) {
+                    agentInstances.add(agentClass.cast(agentInstance));
+                }
+            }
+        } catch (FIPAException e) {
+            e.printStackTrace();
+        }
+
+        return agentInstances;
+    }
+    private Object requestAgentInstance(AID agentAID) {
         ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
         request.addReceiver(agentAID);
         request.setConversationId(Constants.MSG_ID_INSTANCE_REQUEST);
@@ -111,30 +139,10 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
         ACLMessage response = blockingReceive(MessageTemplate.MatchConversationId(Constants.MSG_ID_INSTANCE_INFORM));
         if (response != null) {
             try {
-                return agentClass.cast(response.getContentObject());
+                return response.getContentObject();
             } catch (Exception e) { }
         }
         return null;
-    }
-    public List<AID> findAgentsByType(String type) {
-        // I really hate having it here
-        List<AID> agentDescriptions = new ArrayList<>();
-
-        DFAgentDescription template = new DFAgentDescription();
-        ServiceDescription sd = new ServiceDescription();
-        sd.setType(type);
-        template.addServices(sd);
-
-        try {
-            DFAgentDescription[] result = DFService.search(this, template);
-            for (DFAgentDescription dfd : result) {
-                agentDescriptions.add(dfd.getName());
-            }
-        } catch (FIPAException e) {
-            e.printStackTrace();
-        }
-
-        return agentDescriptions;
     }
 
     // Position is continuously updated in the background.

@@ -43,11 +43,11 @@ public class RetailerAgent extends BaseAgent implements AgentTypeProvider {
         }
         @Override
         protected void onTick() {
-            List<AID> mainHubAIDs = findAgentsByType(MainHub.class.getSimpleName());
+            List<MainHub> mainHubAIDs = (List<MainHub>) findAgentsByClass(MainHub.class);
 
             try {
                 if (mainHubAIDs != null && mainHubAIDs.size() > 0) {
-                    AID mainHubAID = mainHubAIDs.get(0); // Assuming only one MainHub agent // TODO: check
+                    AID mainHubAID = mainHubAIDs.get(0).getAID(); // Assuming only one MainHub agent // TODO: check
                     ACLMessage deliveryRequest = new ACLMessage(ACLMessage.REQUEST);
                     deliveryRequest.setConversationId(Constants.MSG_ID_DELIVERY_REQUEST);
                     deliveryRequest.addReceiver(mainHubAID);
