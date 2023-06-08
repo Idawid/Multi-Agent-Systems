@@ -2,6 +2,7 @@ package agents;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.ContainerID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -15,7 +16,9 @@ import simulationUtils.Constants;
 import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +30,9 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
     // TODO move doesn't work :(
     // TODO this class and all its fields HAVE TO be serializable for setContentObject(this) to work
     private LocationPin locationPin;
+    private ContainerID containerID;
+    private String address;
+    private String port;
     // private Timer updateTimer; // Not serializable - will crash
 
     public BaseAgent(Location location) {
@@ -37,30 +43,65 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
         super();
     }
     protected void setup() {
-        registerWithDF();
+        init();
+        addBehaviour(new HandleRequestBehaviour());
+    }
+    private void init() {
         try {
-            LocationMap locationMap = (LocationMap) Naming.lookup("rmi://localhost/locationMap");
-            locationMap.addLocationPin(this.getLocalName(), locationPin);
-            locationMap.registerObserver(new LocationMapObserverProxy(this));
+            registerWithDF();
+            registerWithLocationMap();
+            initAgentNetworkAttributes();
+
             // startPositionUpdate();
         } catch (Exception e) {
             e.printStackTrace();
+            System.exit(1);
         }
-        addBehaviour(new HandleRequestBehaviour());
     }
-
     protected void takeDown() {
-        deregisterFromDF();
         try {
-            LocationMap locationMap = (LocationMap) Naming.lookup("rmi://localhost/locationMap");
-            locationMap.removeLocationPin(this.getLocalName());
-            locationMap.unregisterObserver(new LocationMapObserverProxy(this));
+            deregisterFromDF();
+            deregisterFromLocationMap();
         } catch (Exception e) {
             e.printStackTrace();
+            System.exit(1);
         }
         // stopPositionUpdate();
     }
+    private void initAgentNetworkAttributes() {
+        // Attributes are transient
+        String containerName = this.getProperty("container-name", null);
+        String address = this.getProperty("host", null);
+        String port = this.getProperty("port", null);
 
+        ContainerID containerID = new ContainerID();
+        containerID.setName(containerName);
+        containerID.setAddress(address);
+        containerID.setPort(port);
+
+        this.containerID = containerID;
+        this.address = address;
+        this.port = port;
+    }
+    public void setAgentNetworkAttributes(BaseAgent networkAgent) {
+        this.containerID = networkAgent.containerID;
+        this.address = networkAgent.address;
+        this.port = networkAgent.port;
+    }
+    public void doMove(BaseAgent targetAgent) {
+        super.doMove(targetAgent.containerID);
+        setAgentNetworkAttributes(targetAgent);
+    }
+    private void registerWithLocationMap() throws MalformedURLException, NotBoundException, RemoteException {
+        LocationMap locationMap = (LocationMap) Naming.lookup("rmi://localhost/locationMap");
+        locationMap.addLocationPin(this.getLocalName(), locationPin);
+        locationMap.registerObserver(new LocationMapObserverProxy(this));
+    }
+    private void deregisterFromLocationMap() throws MalformedURLException, NotBoundException, RemoteException {
+        LocationMap locationMap = (LocationMap) Naming.lookup("rmi://localhost/locationMap");
+        locationMap.removeLocationPin(this.getLocalName());
+        locationMap.unregisterObserver(new LocationMapObserverProxy(this));
+    }
     private void registerWithDF() {
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
@@ -76,7 +117,6 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
             fe.printStackTrace();
         }
     }
-
     private void deregisterFromDF() {
         try {
             DFService.deregister(this);
@@ -84,7 +124,6 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
             fe.printStackTrace();
         }
     }
-
     private class HandleRequestBehaviour extends CyclicBehaviour {
         public void action() {
             ACLMessage request = receive(MessageTemplate.MatchConversationId(Constants.MSG_ID_INSTANCE_REQUEST));

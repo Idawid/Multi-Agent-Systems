@@ -1,4 +1,4 @@
-package simulationUtils.allocators;
+package simulationUtils.assignmentStrategies.warehouse;
 
 import agents.WarehouseAgent;
 import jade.core.AID;

@@ -29,21 +29,29 @@ public class CoreEntry {
             throw new RuntimeException(e);
         }
 
-        // Initialize the main container, it's always required
-        containers.MainContainer mainContainer = new MainContainer(CONTAINER_MAIN);
-        Location mainHubLocation = LocationInitializer.generateRandomLocations(1, 0, MapConfig.MAP_BOUND_X, 0, MapConfig.MAP_BOUND_Y).get(0);
+        // Initialize the main container, required
+        MainContainer mainContainer = new MainContainer(CONTAINER_MAIN);
+        Location mainHubLocation = LocationInitializer.generateRandomLocation();
         mainContainer.addAgent(AGENT_MAIN_HUB_PREFIX + "0", new MainHub(mainHubLocation));
 
         // Load the locations for different retailers
-        List<Location> retailerLocations = LocationInitializer.generateRandomLocations(3, 0, MapConfig.MAP_BOUND_X, 0, MapConfig.MAP_BOUND_Y);
+        List<Location> retailerLocations = LocationInitializer.generateRandomLocations(3);
         RetailerContainer retailerContainer = new RetailerContainer(CONTAINER_RETAIL, retailerLocations);
 
         // Load the locations for different warehouses
-        List<Location> warehouseLocations1 = LocationInitializer.generateRandomLocations(2, 0, MapConfig.MAP_BOUND_X, 0, MapConfig.MAP_BOUND_Y);
+        List<Location> warehouseLocations1 = LocationInitializer.generateRandomLocations(2);
         List<Location> truckLocations1 = new ArrayList<>();
         truckLocations1.addAll(Collections.nCopies(2, warehouseLocations1.get(0))); // 2 in warehouse 0
         truckLocations1.addAll(Collections.nCopies(1, warehouseLocations1.get(1))); // 1 in warehouse 1
 
         WarehouseContainer warehouseContainer1 = new WarehouseContainer(CONTAINER_WAREHOUSE_PREFIX, 1, warehouseLocations1, truckLocations1);
+
+        // Load the locations for different warehouses
+        warehouseLocations1 = LocationInitializer.generateRandomLocations(2);
+        truckLocations1 = new ArrayList<>();
+        truckLocations1.addAll(Collections.nCopies(2, warehouseLocations1.get(0))); // 2 in warehouse 0
+        truckLocations1.addAll(Collections.nCopies(1, warehouseLocations1.get(1))); // 1 in warehouse 1
+
+        WarehouseContainer warehouseContainer2 = new WarehouseContainer(CONTAINER_WAREHOUSE_PREFIX, 2, warehouseLocations1, truckLocations1);
     }
 }

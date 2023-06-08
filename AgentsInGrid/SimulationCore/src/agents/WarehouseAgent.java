@@ -18,7 +18,6 @@ import java.util.List;
 
 public class WarehouseAgent extends BaseAgent implements AgentTypeProvider {
     // TODO handle delivery Tasks from MainHub:
-    //  - match msg of id Constants.MSG_ID_DELIVERY_INFORM
     //  - assign received tasks further to TruckAgent's
 
     // TODO handle multiple delivery Tasks
@@ -50,7 +49,6 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider {
                 try {
                     Task task = (Task) deliveryRequest.getContentObject();
                     tasks.add(task);
-                    System.out.println(task.toString());
                 } catch (UnreadableException e) {
                     System.out.println("Failed to extract Task object from the received message.");
                 }

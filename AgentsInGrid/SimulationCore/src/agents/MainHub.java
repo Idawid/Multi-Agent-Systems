@@ -9,10 +9,9 @@ import mapUtils.AgentTypeProvider;
 import mapUtils.Location;
 import simulationUtils.Constants;
 import simulationUtils.Task;
-import simulationUtils.allocators.ProximityBasedAssignmentStrategy;
-import simulationUtils.allocators.WarehouseAssignmentStrategy;
+import simulationUtils.assignmentStrategies.warehouse.ProximityBasedAssignmentStrategy;
+import simulationUtils.assignmentStrategies.warehouse.WarehouseAssignmentStrategy;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MainHub extends BaseAgent implements AgentTypeProvider {
