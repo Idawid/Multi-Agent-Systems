@@ -5,6 +5,8 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -12,6 +14,7 @@ import javafx.stage.Stage;
 import mapUtils.*;
 
 import java.io.Serializable;
+import java.nio.file.Paths;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -22,7 +25,6 @@ public class LocationMapVisualizer extends Application implements LocationMapObs
 
     private static final int MAP_WIDTH = MapConfig.MAP_BOUND_X;
     private static final int MAP_HEIGHT = MapConfig.MAP_BOUND_Y;
-    private static final int PIN_RADIUS = 5;
     private static final int GRID_SIZE = 20;
 
     private Map<String, LocationPin> locationPins = new HashMap<>();
@@ -89,34 +91,61 @@ public class LocationMapVisualizer extends Application implements LocationMapObs
         if (root == null) {
             return;
         }
-        removeAllCircles();
+        removeAllIcons();
         for (LocationPin pin : locationPins.values()) {
-            addPin(pin);
+            addIcon(pin);
         }
     }
 
-    private void addPin(LocationPin pin) {
-        if(root == null) {
-            return;
-        }
-        Circle pinShape = new Circle(pin.getX(), pin.getY(), PIN_RADIUS);
-        root.getChildren().add(pinShape);
-    }
-
-    private void removePin(LocationPin pin) {
-        if(root == null) {
-            return;
-        }
-        root.getChildren().removeIf(node ->
-                node instanceof Circle && ((Circle) node).getCenterX() == pin.getX() &&
-                        ((Circle) node).getCenterY() == pin.getY());
-    }
-
-    private void removeAllCircles() {
+    private void addIcon(LocationPin pin) {
         if (root == null) {
             return;
         }
-        root.getChildren().removeIf(Circle.class::isInstance);
+
+        ImageView icon = new ImageView();
+        // Set the appropriate image for the agent type based on the AgentType enum
+        String resourcePath = Paths.get(System.getProperty("user.dir"),"Visualization", "resources").toString();
+        switch (pin.getAgentType()) {
+            case AGENT_RETAILER:
+                icon.setImage(new Image(Paths.get(resourcePath, "retailer_icon.png").toString()));
+                break;
+            case AGENT_TRUCK:
+                icon.setImage(new Image(Paths.get(resourcePath, "truck_icon.png").toString()));
+                break;
+            case AGENT_WAREHOUSE:
+                icon.setImage(new Image(Paths.get(resourcePath, "warehouse_icon.png").toString()));
+                break;
+            case AGENT_MAIN_HUB:
+                icon.setImage(new Image(Paths.get(resourcePath, "main_hub_icon.png").toString()));
+                break;
+            default:
+                // Handle unknown agent types
+                break;
+        }
+        icon.setPreserveRatio(true);
+        icon.setFitWidth(50);
+
+        icon.setLayoutX(pin.getX());
+        icon.setLayoutY(pin.getY());
+        root.getChildren().add(icon);
+    }
+
+    private void removeIcon(LocationPin pin) {
+        if (root == null) {
+            return;
+        }
+
+        root.getChildren().removeIf(node ->
+                node instanceof ImageView && node.getLayoutX() == pin.getX() &&
+                        node.getLayoutY() == pin.getY());
+    }
+
+    private void removeAllIcons() {
+        if (root == null) {
+            return;
+        }
+
+        root.getChildren().removeIf(ImageView.class::isInstance);
     }
 
     public static void main(String[] args) {
