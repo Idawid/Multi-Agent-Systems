@@ -77,26 +77,31 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider {
         @Override
         protected void onTick() {
             if (!tasks.isEmpty()) {
-                Task task = tasks.remove(0);
-
                 List<TruckAgent> trucks = (List<TruckAgent>) findAgentsByClass(TruckAgent.class);
-                if (trucks != null && !trucks.isEmpty()) {
-                    trucks.removeIf(truckAgent -> !truckAgent.getContainerID().equals(((WarehouseAgent) myAgent).getContainerID()));
-                    trucks.removeIf(truckAgent -> truckAgent.getCurrentTask() != null);
-                    AID truckAID = assignmentStrategy.assignTruckAgent(task, trucks);
-
-                    ACLMessage deliveryInstruction = new ACLMessage(ACLMessage.INFORM);
-                    deliveryInstruction.setConversationId(Constants.MSG_ID_DELIVERY_INFORM);
-                    deliveryInstruction.addReceiver(truckAID);
-
-                    try {
-                        deliveryInstruction.setContentObject(task);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                    send(deliveryInstruction);
+                if (trucks == null) {
+                    return;
                 }
+
+                trucks.removeIf(truckAgent -> !truckAgent.getContainerID().equals(((WarehouseAgent) myAgent).getContainerID()));
+                trucks.removeIf(truckAgent -> truckAgent.getCurrentTask() != null);
+                if (trucks.isEmpty()) {
+                    return;
+                }
+
+                Task task = tasks.remove(0);
+                AID truckAID = assignmentStrategy.assignTruckAgent(task, trucks);
+                ACLMessage deliveryInstruction = new ACLMessage(ACLMessage.INFORM);
+                deliveryInstruction.setConversationId(Constants.MSG_ID_DELIVERY_INFORM);
+                deliveryInstruction.addReceiver(truckAID);
+
+                try {
+                    deliveryInstruction.setContentObject(task);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                System.out.println(myAgent.getLocalName() + " asked truck: " + truckAID.getLocalName() +
+                        " for a delivery to: " + task.getRetailerAID().getLocalName());
+                send(deliveryInstruction);
             }
         }
     }
