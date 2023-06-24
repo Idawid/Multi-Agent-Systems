@@ -5,6 +5,9 @@ import jade.core.Agent;
 import java.io.Serializable;
 
 public class LocationPin extends Location implements Serializable {
+    // TODO [1]: locationPin drawing
+    //  - draw stock of Truck/Warehouse
+    //  - draw profits of Retailer
     private AgentType agentType;
 
     public LocationPin(int x, int y, Class<? extends Agent> agentClass) {

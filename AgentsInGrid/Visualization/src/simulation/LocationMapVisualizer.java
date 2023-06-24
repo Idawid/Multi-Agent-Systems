@@ -22,6 +22,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LocationMapVisualizer extends Application implements LocationMapObserver, Serializable {
+    // TODO [1]: locationPin drawing
+    //  - draw stock of Truck/Warehouse
+    //  - draw profits of Retailer
+
+    // TODO [2]: make X close the application
+    //  - annoying.
+
+    // TODO [2?] event type (add / delete)
+    //  - don't sync every pin on the map, don't delete/add each children (just the ones changed)
+    //  don't implement unless lags, but if it lags it has priority
 
     private static final int MAP_WIDTH = MapConfig.MAP_BOUND_X;
     private static final int MAP_HEIGHT = MapConfig.MAP_BOUND_Y;

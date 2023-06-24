@@ -9,7 +9,9 @@ import java.io.Serializable;
 import java.util.List;
 
 public class ProximityBasedAssignmentStrategy implements TruckAssignmentStrategy, Serializable {
-    // TODO trucks moves this has to be implemented differently
+    // TODO [3]
+    //  (we use random strategy anyway)
+    //  - trucks moves this has to be implemented differently (check?)
     @Override
     public AID assignTruckAgent(Task task, List<TruckAgent> trucks) {
         if (trucks == null || trucks.isEmpty()) {

@@ -16,15 +16,22 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class TruckAgent extends BaseAgent implements AgentTypeProvider {
-    // TODO handle delivery Task:
-    //  - performTask should move this agent (BaseAgent has incorrect implementation of move)
-    //  - send msg of id Constants.MSG_ID_DELIVERY_INSTRUCTION to RetailerAgent
+    // TODO [1] stock:
+    //  - truck needs to have stock (max stock, current load, percentage?)
 
-    // TODO interrupts:
-    //  - how the move may be interrupted, slowed down
+    // TODO [1] road events:
+    //  - the move may be interrupted, slowed down
 
-    // TODO statistics:
+    // TODO [1] time estimate:
+    //  - instead of t=s/v from the based on the distance from truck to retailer
+
+    // TODO [3] better time estimate:
+    //  - instead of t=s/v
     //  - how to gather information about the move, and what can WarehouseAgent do with that (???)
+
+    // TODO [3] task chains:
+    //  - multiple tasks, varied tasks, all use the same stock
+
     private Task currentTask = null;
     private List<Integer> pastDeliveryTimes;
 
@@ -51,12 +58,11 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider {
                 return;
             }
             try {
-                Task task = (Task) deliveryRequest.getContentObject();
-                currentTask = task;
+                currentTask = (Task) deliveryRequest.getContentObject();
                 System.out.println(myAgent.getLocalName() + " got assigned a task!");
                 performTask();
             } catch (UnreadableException e) {
-                System.out.println("Failed to extract Task object from the received message.");
+                System.err.println("Failed to extract Task object from the received message.");
             }
         }
     }

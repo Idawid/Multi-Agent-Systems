@@ -20,11 +20,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WarehouseAgent extends BaseAgent implements AgentTypeProvider {
-    // TODO handle delivery Tasks from MainHub:
-    //  - assign received tasks further to TruckAgent's
+    // TODO [1] stock:
+    //  - warehouses need to have stock (max stock, current stock, percentage?)
+    //  - request stock from MainHub agent
+    //  - quantity in task: warehouse: stock - quantity, truck: stock + quantity
+    // TODO [1] exchanging stock:
+    //  - if over max stock try to exchange request negative, if 0 stock request positive
 
-    // TODO handle multiple delivery Tasks
-    //  - round robin strategy to assign them to TruckAgent's
+    // TODO [1] exchanging tasks:
+    //  - pass the task to another warehouse (maybe request task-> check if more than 3? tasks-> pass the task)
+
     private TruckAssignmentStrategy assignmentStrategy;
     private List<Task> tasks;
 
@@ -55,7 +60,7 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider {
                     Task task = (Task) deliveryRequest.getContentObject();
                     tasks.add(task);
                 } catch (UnreadableException e) {
-                    System.out.println("Failed to extract Task object from the received message.");
+                    System.err.println("Failed to extract Task object from the received message.");
                 }
             } else {
                 block();

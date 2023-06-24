@@ -16,6 +16,7 @@ import simulationUtils.Constants;
 
 import java.io.IOException;
 import java.io.NotSerializableException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
@@ -32,6 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class BaseAgent extends Agent implements LocationMapObserver, Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
     private static final Logger logger = Logger.getMyLogger(BaseAgent.class.getName());
     private LocationPin locationPin;
@@ -160,9 +162,8 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
             DFAgentDescription[] result = DFService.search(this, template);
             for (DFAgentDescription dfd : result) {
                 AID agentAID = dfd.getName();
-                System.out.println("Found: " + result.length + " agents");
                 Object agentInstance = requestAgentInstance(agentAID);
-                if (agentInstance != null && agentClass.isInstance(agentInstance)) {
+                if (agentClass.isInstance(agentInstance)) {
                     agentInstances.add(agentClass.cast(agentInstance));
                 }
             }
@@ -251,6 +252,7 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
     }
 
     public void locationUpdated(String agentName, LocationPin newLocationPin) throws RemoteException {
+        // Agents don't handle LocationMap updates for now
         return;
     }
 }

@@ -8,9 +8,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class LocationMapImpl extends UnicastRemoteObject implements LocationMap {
-    private int mapBoundX;
-    private int mapBoundY;
-    private ConcurrentMap<String, LocationPin> locationPins;
+    // TODO [2] event type (add / delete)
+    //  - maybe pass the null? somehow let the observer know what happened,
+    //          so he doesn't need to sync the whole map, but just this changed pin
+
+    private final int mapBoundX;
+    private final int mapBoundY;
+    private final ConcurrentMap<String, LocationPin> locationPins;
 
     public LocationMapImpl() throws RemoteException {
         this.mapBoundX = MapConfig.MAP_BOUND_X;
@@ -45,7 +49,7 @@ public class LocationMapImpl extends UnicastRemoteObject implements LocationMap 
         notifyObservers(agentName, pin);
     }
 
-    private List<LocationMapObserver> observers = new ArrayList<>();
+    private final List<LocationMapObserver> observers = new ArrayList<>();
 
     public void registerObserver(LocationMapObserver observer) throws RemoteException {
         observers.add(observer);

@@ -15,6 +15,8 @@ import simulationUtils.assignmentStrategies.warehouse.WarehouseAssignmentStrateg
 import java.util.List;
 
 public class MainHub extends BaseAgent implements AgentTypeProvider {
+    // TODO [1] stock:
+    //  - mainhub has infinite stock, handle stock requests of warehouses
     private WarehouseAssignmentStrategy assignmentStrategy;
 
     public MainHub(Location location) {

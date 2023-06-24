@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Random;
 
 public class RetailerAgent extends BaseAgent implements AgentTypeProvider {
+    // TODO [1] stock / profits:
+    //  - retailers need to calculate profits (current profits)
+    //  - quantity in task: quantity * profit per 1, truck: stock - quantity
     private static final int MIN_DELIVERY_INTERVAL = 5000; // Minimum delivery interval in milliseconds
     private static final int MAX_DELIVERY_INTERVAL = 15000; // Maximum delivery interval in milliseconds
 
@@ -47,7 +50,7 @@ public class RetailerAgent extends BaseAgent implements AgentTypeProvider {
 
             try {
                 if (mainHubAIDs != null && mainHubAIDs.size() > 0) {
-                    AID mainHubAID = mainHubAIDs.get(0).getAID(); // Assuming only one MainHub agent // TODO: check
+                    AID mainHubAID = mainHubAIDs.get(0).getAID(); // Assuming only one MainHub agent // TODO: [2] more than one mainhub
                     ACLMessage deliveryRequest = new ACLMessage(ACLMessage.REQUEST);
                     deliveryRequest.setConversationId(Constants.MSG_ID_DELIVERY_REQUEST);
                     deliveryRequest.addReceiver(mainHubAID);
@@ -57,7 +60,7 @@ public class RetailerAgent extends BaseAgent implements AgentTypeProvider {
 
                     send(deliveryRequest);
                 } else {
-                    System.out.println("Main Hub agent not found.");
+                    System.err.println("Main Hub agent not found.");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -77,8 +80,7 @@ public class RetailerAgent extends BaseAgent implements AgentTypeProvider {
                 try {
                     Task task = (Task) deliveryInstructions.getContentObject();
                     int quantity = task.getQuantity();
-                    System.out.println("Received delivery instructions with quantity: " + quantity + " from "
-                            + deliveryInstructions.getSender().getLocalName());
+                    // TODO delivery completed, update profits
                 } catch (UnreadableException e) {
                     e.printStackTrace();
                 }
