@@ -4,18 +4,25 @@ import jade.core.AID;
 import mapUtils.locationPin.Location;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 public class Task implements Serializable {
+    private final UUID id;
     private Location destination;
     private ProductType product;
     private int quantity;
     private AID retailerAID;
 
     public Task(Location destination, ProductType product, int quantity, AID retailerAID) {
+        this.id = UUID.randomUUID();
         this.destination = destination;
         this.product = product;
         this.quantity = quantity;
         this.retailerAID = retailerAID;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public Location getDestination() {

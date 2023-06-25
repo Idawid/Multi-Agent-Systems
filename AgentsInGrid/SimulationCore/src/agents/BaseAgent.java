@@ -136,7 +136,7 @@ public abstract class BaseAgent extends Agent implements LocationMapObserver, Se
 
                 if (request != null) {
                     try {
-                        System.out.println(agent.getLocalName() + " got a Object request in a thread");
+                        // System.out.println(agent.getLocalName() + " got a Object request in a thread");
 
                         ACLMessage response = new ACLMessage(ACLMessage.INFORM);
                         response.setConversationId(Constants.MSG_ID_INSTANCE_INFORM);
@@ -193,7 +193,7 @@ public abstract class BaseAgent extends Agent implements LocationMapObserver, Se
         ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
         request.addReceiver(agentAID);
         request.setConversationId(Constants.MSG_ID_INSTANCE_REQUEST);
-        System.out.println("Object request sent to: " + agentAID.getLocalName());
+        // System.out.println("Object request sent to: " + agentAID.getLocalName());
         send(request);
         //System.out.println("Start block receive for: " + agentAID.getLocalName());
         ACLMessage response = blockingReceive(MessageTemplate.MatchConversationId(Constants.MSG_ID_INSTANCE_INFORM));
