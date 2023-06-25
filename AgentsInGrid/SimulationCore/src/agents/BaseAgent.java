@@ -170,12 +170,14 @@ public abstract class BaseAgent extends Agent implements LocationMapObserver, Se
 
         return agentInstances;
     }
-    private Object requestAgentInstance(AID agentAID) {
+    public Object requestAgentInstance(AID agentAID) {
         ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
         request.addReceiver(agentAID);
         request.setConversationId(Constants.MSG_ID_INSTANCE_REQUEST);
         send(request);
+        System.out.println("Start block receive for: " + agentAID.getLocalName());
         ACLMessage response = blockingReceive(MessageTemplate.MatchConversationId(Constants.MSG_ID_INSTANCE_INFORM));
+        System.out.println("End block receive for: " + agentAID.getLocalName());
         if (response != null) {
             try {
                 return response.getContentObject();

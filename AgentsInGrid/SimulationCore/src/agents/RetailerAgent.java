@@ -37,7 +37,7 @@ public class RetailerAgent extends BaseAgent implements AgentTypeProvider, Agent
 
     private class SendDeliveryRequestBehaviour extends TickerBehaviour {
         public SendDeliveryRequestBehaviour(Agent a) {
-            super(a, 1000);
+            super(a, 20000);
         }
         public SendDeliveryRequestBehaviour(Agent a, long period) {
             super(a, period);
@@ -65,7 +65,7 @@ public class RetailerAgent extends BaseAgent implements AgentTypeProvider, Agent
             }
 
             // Randomizes the delivery request intervals
-            reset(getRandomDeliveryInterval());
+            //reset(getRandomDeliveryInterval());
         }
     }
 
