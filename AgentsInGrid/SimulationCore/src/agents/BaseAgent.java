@@ -12,7 +12,6 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.util.Logger;
 import mapUtils.*;
-import mapUtils.locationPin.AgentData;
 import mapUtils.locationPin.Location;
 import mapUtils.locationPin.LocationPin;
 import simulationUtils.Constants;
@@ -34,7 +33,7 @@ public abstract class BaseAgent extends Agent implements LocationMapObserver, Se
 
     @Serial
     private static final long serialVersionUID = 1L;
-    private static final Logger logger = Logger.getMyLogger(BaseAgent.class.getName());
+    static final Logger logger = Logger.getMyLogger(BaseAgent.class.getName());
     private LocationPin locationPin;
     private ContainerID containerID;
     private String address;

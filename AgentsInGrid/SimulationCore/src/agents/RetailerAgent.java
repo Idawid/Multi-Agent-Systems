@@ -7,11 +7,15 @@ import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
+import jade.util.Logger;
+import mapUtils.LocationMap;
 import mapUtils.locationPin.*;
 import simulationUtils.Constants;
+import simulationUtils.ProductType;
 import simulationUtils.Task;
 import simulationUtils.generators.OrderGenerator;
 
+import java.rmi.Naming;
 import java.util.List;
 import java.util.Random;
 
@@ -76,15 +80,32 @@ public class RetailerAgent extends BaseAgent implements AgentTypeProvider, Agent
 
             if (deliveryInstructions != null) {
                 try {
-                    Task task = (Task) deliveryInstructions.getContentObject();
-                    int quantity = task.getQuantity();
-                    // TODO delivery completed, update profits
+                    Task order = (Task) deliveryInstructions.getContentObject();
+                    sell(order);
                 } catch (UnreadableException e) {
                     e.printStackTrace();
                 }
             } else {
                 block();
             }
+        }
+    }
+
+    private void sell(Task order) {
+        ProductType productType = order.getProduct();
+        int quantity = order.getQuantity();
+
+        double rate = productType.getRate();
+        double profits = rate * quantity;
+
+        RetailerData retailerData = (RetailerData) this.getLocationPin().getAgentData();
+        retailerData.setProfit(retailerData.getProfit() + profits);
+
+        try {
+            LocationMap locationMap = (LocationMap) Naming.lookup(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT);
+            locationMap.updateLocationPin(this.getLocalName(), this.getLocationPin());
+        } catch (Exception e) {
+            this.logger.log(Logger.WARNING, "Failed to update location on the remote map.");
         }
     }
 

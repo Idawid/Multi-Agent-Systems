@@ -25,7 +25,7 @@ public class LocationPin extends Location implements Serializable {
     }
 
     public LocationPin(Location location, Class<? extends Agent> agentClass) {
-        super(location); // this is beautiful
+        super(location);
         this.agentType = AgentType.getByAgentClass(agentClass);
         this.agentData = AgentData.getByAgentClass(agentClass);
     }
