@@ -7,9 +7,7 @@ import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
-import mapUtils.AgentType;
-import mapUtils.AgentTypeProvider;
-import mapUtils.Location;
+import mapUtils.locationPin.*;
 import simulationUtils.Constants;
 import simulationUtils.Task;
 import simulationUtils.generators.OrderGenerator;
@@ -17,7 +15,7 @@ import simulationUtils.generators.OrderGenerator;
 import java.util.List;
 import java.util.Random;
 
-public class RetailerAgent extends BaseAgent implements AgentTypeProvider {
+public class RetailerAgent extends BaseAgent implements AgentTypeProvider, AgentDataProvider {
     // TODO [1] stock / profits:
     //  - retailers need to calculate profits (current profits)
     //  - quantity in task: quantity * profit per 1, truck: stock - quantity
@@ -97,6 +95,10 @@ public class RetailerAgent extends BaseAgent implements AgentTypeProvider {
     @Override
     public AgentType getAgentType() {
         return AgentType.AGENT_RETAILER;
+    }
+    @Override
+    public AgentData getAgentData() {
+        return new RetailerData();
     }
 }
 

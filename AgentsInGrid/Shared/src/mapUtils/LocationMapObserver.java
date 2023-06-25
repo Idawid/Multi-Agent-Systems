@@ -1,5 +1,7 @@
 package mapUtils;
 
+import mapUtils.locationPin.LocationPin;
+
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 

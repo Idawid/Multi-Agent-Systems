@@ -9,7 +9,7 @@ import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 import simulationUtils.Constants;
-import mapUtils.Location;
+import mapUtils.locationPin.Location;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public class WarehouseContainer {
         // Trucks
         List<TruckAgent> truckAgentList = new ArrayList<>();
         for (Location location : truckLocations) { // Trucks rest in the warehouses
-            TruckAgent truckAgent = new TruckAgent(location);
+            TruckAgent truckAgent = new TruckAgent(location, 1000);
             truckAgentList.add(truckAgent);
             addAgent(Constants.AGENT_TRUCK_PREFIX + idTruckCounter, truckAgent);
             idTruckCounter++;

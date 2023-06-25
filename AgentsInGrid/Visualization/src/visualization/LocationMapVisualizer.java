@@ -1,38 +1,29 @@
-package simulation;
+package visualization;
 
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import mapUtils.*;
+import mapUtils.locationPin.LocationPin;
+import visualizationUtils.IconContainerBuilder;
 
 import java.io.Serializable;
-import java.nio.file.Paths;
+import java.net.MalformedURLException;
 import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
 
 public class LocationMapVisualizer extends Application implements LocationMapObserver, Serializable {
-    // TODO [1]: locationPin drawing
-    //  - draw stock of Truck/Warehouse
-    //  - draw profits of Retailer
-
-    // TODO [2]: make X close the application
-    //  - annoying.
-
-    // TODO [2?] event type (add / delete)
-    //  - don't sync every pin on the map, don't delete/add each children (just the ones changed)
-    //  don't implement unless lags, but if it lags it has priority
-
     private static final int MAP_WIDTH = MapConfig.MAP_BOUND_X;
     private static final int MAP_HEIGHT = MapConfig.MAP_BOUND_Y;
     private static final int GRID_SIZE = 20;
@@ -40,18 +31,12 @@ public class LocationMapVisualizer extends Application implements LocationMapObs
     private Map<String, LocationPin> locationPins = new HashMap<>();
     private Pane root;
     private LocationMap locationMap;
-
+    private LocationMapObserverProxy proxy;
 
     @Override
     public void start(Stage primaryStage) {
-        try {
-            locationMap = (LocationMap) Naming.lookup(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT);
-            UnicastRemoteObject.exportObject(locationMap, 0);
-            locationMap.registerObserver(new LocationMapObserverProxy(this));
-        } catch (Exception e) {
-            e.printStackTrace();
-            Platform.exit();
-        }
+        registerWithLocationMap();
+
         root = new Pane();
 
         Canvas canvas = new Canvas(MAP_WIDTH, MAP_HEIGHT);
@@ -71,6 +56,11 @@ public class LocationMapVisualizer extends Application implements LocationMapObs
         primaryStage.setMaxHeight(MAP_HEIGHT);
 
         primaryStage.show();
+        primaryStage.setOnCloseRequest(event -> {
+            deregisterFromLocationMap();
+            Platform.exit();
+            System.exit(0);
+        });
 
         initLocationPins();
     }
@@ -102,52 +92,31 @@ public class LocationMapVisualizer extends Application implements LocationMapObs
             return;
         }
         removeAllIcons();
-        for (LocationPin pin : locationPins.values()) {
-            addIcon(pin);
+        for (Map.Entry<String, LocationPin> entry : locationPins.entrySet()) {
+            String pinName = entry.getKey();
+            LocationPin pin = entry.getValue();
+            addIcon(pinName, pin);
         }
     }
 
-    private void addIcon(LocationPin pin) {
+    private void addIcon(String name, LocationPin pin) {
         if (root == null) {
             return;
         }
 
-        ImageView icon = new ImageView();
-        // Set the appropriate image for the agent type based on the AgentType enum
-        String resourcePath = Paths.get(System.getProperty("user.dir"),"Visualization", "resources").toString();
-        switch (pin.getAgentType()) {
-            case AGENT_RETAILER:
-                icon.setImage(new Image(Paths.get(resourcePath, "retailer_icon.png").toString()));
-                break;
-            case AGENT_TRUCK:
-                icon.setImage(new Image(Paths.get(resourcePath, "truck_icon.png").toString()));
-                break;
-            case AGENT_WAREHOUSE:
-                icon.setImage(new Image(Paths.get(resourcePath, "warehouse_icon.png").toString()));
-                break;
-            case AGENT_MAIN_HUB:
-                icon.setImage(new Image(Paths.get(resourcePath, "main_hub_icon.png").toString()));
-                break;
-            default:
-                // Handle unknown agent types
-                break;
-        }
-        icon.setPreserveRatio(true);
-        icon.setFitWidth(50);
-
-        icon.setLayoutX(pin.getX());
-        icon.setLayoutY(pin.getY());
-        root.getChildren().add(icon);
+        VBox iconContainer = IconContainerBuilder.createLocationPinView.createLocationPinView(pin, name);
+        root.getChildren().add(iconContainer);
     }
 
-    private void removeIcon(LocationPin pin) {
+    private void removeIcon(String pinName) {
         if (root == null) {
             return;
         }
 
-        root.getChildren().removeIf(node ->
-                node instanceof ImageView && node.getLayoutX() == pin.getX() &&
-                        node.getLayoutY() == pin.getY());
+        root.getChildren().removeIf(node -> {
+            Object pinId = node.getProperties().get("pinId");
+            return pinId instanceof String && pinId.equals(pinName);
+        });
     }
 
     private void removeAllIcons() {
@@ -155,17 +124,39 @@ public class LocationMapVisualizer extends Application implements LocationMapObs
             return;
         }
 
-        root.getChildren().removeIf(ImageView.class::isInstance);
+        root.getChildren().removeIf(VBox.class::isInstance);
     }
 
     public static void main(String[] args) {
-        Thread javafxThread = new Thread(() -> Application.launch(LocationMapVisualizer.class));
-        javafxThread.start();
+        Application.launch(LocationMapVisualizer.class);
+    }
+
+    private void registerWithLocationMap() {
+        try {
+            locationMap = (LocationMap) Naming.lookup(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT);
+            this.proxy = new LocationMapObserverProxy(this);
+            locationMap.registerObserver(this.proxy);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Platform.exit();
+        }
+    }
+    private void deregisterFromLocationMap() {
+        try {
+            locationMap.unregisterObserver(this.proxy);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Platform.exit();
+        }
     }
 
     @Override
     public void locationUpdated(String agentName, LocationPin newLocationPin) throws RemoteException {
-        this.locationPins = new HashMap<>(locationMap.getLocationPins());
-        Platform.runLater(this::refreshVisualization);
+        Platform.runLater(() -> {
+            removeIcon(agentName);
+            if (newLocationPin != null) {
+                addIcon(agentName, newLocationPin);
+            }
+        });
     }
 }

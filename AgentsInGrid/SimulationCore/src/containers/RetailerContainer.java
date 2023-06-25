@@ -9,7 +9,7 @@ import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 import simulationUtils.Constants;
-import mapUtils.Location;
+import mapUtils.locationPin.Location;
 
 import java.util.List;
 

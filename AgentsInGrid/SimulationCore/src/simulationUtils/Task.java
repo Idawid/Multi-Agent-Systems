@@ -1,7 +1,7 @@
 package simulationUtils;
 
 import jade.core.AID;
-import mapUtils.Location;
+import mapUtils.locationPin.Location;
 
 import java.io.Serializable;
 

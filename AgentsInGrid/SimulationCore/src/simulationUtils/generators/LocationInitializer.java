@@ -1,6 +1,6 @@
 package simulationUtils.generators;
 
-import mapUtils.Location;
+import mapUtils.locationPin.Location;
 import mapUtils.MapConfig;
 
 import java.util.ArrayList;

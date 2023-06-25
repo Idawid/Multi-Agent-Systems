@@ -1,7 +1,7 @@
 package simulationUtils.generators;
 
 import jade.core.AID;
-import mapUtils.Location;
+import mapUtils.locationPin.Location;
 import simulationUtils.ProductType;
 import simulationUtils.Task;
 

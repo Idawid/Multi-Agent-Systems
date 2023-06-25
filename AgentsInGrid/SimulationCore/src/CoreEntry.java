@@ -3,6 +3,7 @@ import containers.MainContainer;
 import containers.RetailerContainer;
 import containers.WarehouseContainer;
 //import simulation.LocationMapVisualizer;
+import mapUtils.locationPin.Location;
 import simulationUtils.generators.LocationInitializer;
 import mapUtils.*;
 
@@ -39,10 +40,10 @@ public class CoreEntry {
         RetailerContainer retailerContainer = new RetailerContainer(CONTAINER_RETAIL, retailerLocations);
 
         // Load the locations for different warehouses
-        List<Location> warehouseLocations1 = LocationInitializer.generateRandomLocations(1);
+        List<Location> warehouseLocations1 = LocationInitializer.generateRandomLocations(2);
         List<Location> truckLocations1 = new ArrayList<>();
-        truckLocations1.addAll(Collections.nCopies(3, warehouseLocations1.get(0))); // 2 in warehouse 0
-        //truckLocations1.addAll(Collections.nCopies(0, warehouseLocations1.get(1))); // 1 in warehouse 1
+        truckLocations1.addAll(Collections.nCopies(2, warehouseLocations1.get(0))); // 2 in warehouse 0
+        truckLocations1.addAll(Collections.nCopies(1, warehouseLocations1.get(1))); // 1 in warehouse 1
 
         WarehouseContainer warehouseContainer1 = new WarehouseContainer(CONTAINER_WAREHOUSE_PREFIX, 1, warehouseLocations1, truckLocations1);
     }

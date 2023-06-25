@@ -12,6 +12,9 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.util.Logger;
 import mapUtils.*;
+import mapUtils.locationPin.AgentData;
+import mapUtils.locationPin.Location;
+import mapUtils.locationPin.LocationPin;
 import simulationUtils.Constants;
 
 import java.io.IOException;
@@ -25,13 +28,9 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
-public class BaseAgent extends Agent implements LocationMapObserver, Serializable {
+public abstract class BaseAgent extends Agent implements LocationMapObserver, Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -45,9 +44,7 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
         super();
         this.locationPin = new LocationPin(location, this.getClass());
     }
-    public BaseAgent() {
-        super();
-    }
+    public BaseAgent() { }
     protected void setup() {
         init();
         addBehaviour(new HandleRequestBehaviour());
@@ -235,7 +232,7 @@ public class BaseAgent extends Agent implements LocationMapObserver, Serializabl
         return locationPin;
     }
 
-    public void setLocation (Location location) {
+    public void setLocation(Location location) {
         this.locationPin = new LocationPin(location, this.getClass());
     }
 

@@ -1,5 +1,7 @@
 package mapUtils;
 
+import mapUtils.locationPin.LocationPin;
+
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
@@ -46,7 +48,7 @@ public class LocationMapImpl extends UnicastRemoteObject implements LocationMap 
     public void removeLocationPin(String agentName) throws RemoteException {
         LocationPin pin = locationPins.get(agentName);
         locationPins.remove(agentName);
-        notifyObservers(agentName, pin);
+        notifyObservers(agentName, null);
     }
 
     private final List<LocationMapObserver> observers = new ArrayList<>();

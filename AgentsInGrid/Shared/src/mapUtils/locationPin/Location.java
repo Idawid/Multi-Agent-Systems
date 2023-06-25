@@ -1,4 +1,4 @@
-package mapUtils;
+package mapUtils.locationPin;
 
 import java.io.Serializable;
 

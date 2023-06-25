@@ -7,9 +7,7 @@ import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
-import mapUtils.AgentType;
-import mapUtils.AgentTypeProvider;
-import mapUtils.Location;
+import mapUtils.locationPin.*;
 import simulationUtils.Constants;
 import simulationUtils.Task;
 import simulationUtils.assignmentStrategies.truck.RandomAssignmentStrategy;
@@ -19,7 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WarehouseAgent extends BaseAgent implements AgentTypeProvider {
+public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, AgentDataProvider {
     // TODO [1] stock:
     //  - warehouses need to have stock (max stock, current stock, percentage?)
     //  - request stock from MainHub agent
@@ -109,5 +107,9 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider {
     @Override
     public AgentType getAgentType() {
         return AgentType.AGENT_WAREHOUSE;
+    }
+    @Override
+    public AgentData getAgentData() {
+        return new WarehouseData();
     }
 }

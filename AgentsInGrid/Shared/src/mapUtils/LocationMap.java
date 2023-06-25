@@ -1,5 +1,8 @@
 package mapUtils;
 
+import mapUtils.locationPin.AgentData;
+import mapUtils.locationPin.LocationPin;
+
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.concurrent.ConcurrentMap;

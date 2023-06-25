@@ -4,9 +4,7 @@ import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import mapUtils.AgentType;
-import mapUtils.AgentTypeProvider;
-import mapUtils.Location;
+import mapUtils.locationPin.*;
 import simulationUtils.Constants;
 import simulationUtils.Task;
 import simulationUtils.assignmentStrategies.warehouse.ProximityBasedAssignmentStrategy;
@@ -14,7 +12,7 @@ import simulationUtils.assignmentStrategies.warehouse.WarehouseAssignmentStrateg
 
 import java.util.List;
 
-public class MainHub extends BaseAgent implements AgentTypeProvider {
+public class MainHub extends BaseAgent implements AgentTypeProvider, AgentDataProvider {
     // TODO [1] stock:
     //  - mainhub has infinite stock, handle stock requests of warehouses
     private WarehouseAssignmentStrategy assignmentStrategy;
@@ -30,6 +28,7 @@ public class MainHub extends BaseAgent implements AgentTypeProvider {
         super.setup();
         addBehaviour(new ReceiveDeliveryRequestBehaviour());
     }
+
     private class ReceiveDeliveryRequestBehaviour extends CyclicBehaviour {
         @Override
         public void action() {
@@ -65,5 +64,9 @@ public class MainHub extends BaseAgent implements AgentTypeProvider {
     @Override
     public AgentType getAgentType() {
         return AgentType.AGENT_MAIN_HUB;
+    }
+    @Override
+    public AgentData getAgentData() {
+        return null;
     }
 }

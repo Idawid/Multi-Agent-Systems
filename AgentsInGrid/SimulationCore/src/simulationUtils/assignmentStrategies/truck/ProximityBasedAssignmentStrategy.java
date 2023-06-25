@@ -2,7 +2,7 @@ package simulationUtils.assignmentStrategies.truck;
 
 import agents.TruckAgent;
 import jade.core.AID;
-import mapUtils.Location;
+import mapUtils.locationPin.Location;
 import simulationUtils.Task;
 
 import java.io.Serializable;

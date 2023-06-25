@@ -4,10 +4,8 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
+import mapUtils.locationPin.*;
 import simulationUtils.Constants;
-import mapUtils.AgentType;
-import mapUtils.AgentTypeProvider;
-import mapUtils.Location;
 import simulationUtils.Task;
 
 import java.io.IOException;
@@ -15,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class TruckAgent extends BaseAgent implements AgentTypeProvider {
+public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDataProvider {
     // TODO [1] stock:
     //  - truck needs to have stock (max stock, current load, percentage?)
 
@@ -34,13 +32,18 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider {
 
     private Task currentTask = null;
     private List<Integer> pastDeliveryTimes;
+    private int maxLoad;
+    private int load;
 
-    public TruckAgent(Location location) {
+    public TruckAgent(Location location, int maxLoad) {
         super(location);
         this.pastDeliveryTimes = new ArrayList<>();
+        this.load = 0;
+        this.maxLoad = maxLoad;
     }
 
     public TruckAgent() { }
+
     protected void setup() {
         super.setup();
 
@@ -100,6 +103,10 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider {
     @Override
     public AgentType getAgentType() {
         return AgentType.AGENT_TRUCK;
+    }
+    @Override
+    public AgentData getAgentData() {
+        return new TruckData();
     }
 }
 

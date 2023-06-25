@@ -2,7 +2,7 @@ package simulationUtils.assignmentStrategies.warehouse;
 
 import agents.WarehouseAgent;
 import jade.core.AID;
-import mapUtils.Location;
+import mapUtils.locationPin.Location;
 import simulationUtils.Task;
 
 import java.io.Serializable;
