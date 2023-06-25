@@ -52,30 +52,59 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDat
     private class ReceiveDeliveryInformBehaviour extends CyclicBehaviour {
         @Override
         public void action() {
+            if (currentTask != null) {
+                block();
+                return;
+            }
+
             MessageTemplate mt = MessageTemplate.MatchConversationId(Constants.MSG_ID_DELIVERY_INFORM);
             ACLMessage deliveryRequest = receive(mt);
-
             if (deliveryRequest == null) {
                 block();
                 return;
             }
+
             try {
                 currentTask = (Task) deliveryRequest.getContentObject();
-                //System.out.println(myAgent.getLocalName() + " got assigned a task!");
-                performTask();
+
+                String pickUpName = deliveryRequest.getSender().getLocalName();
+                String destinationName = currentTask.getDestinationAID().getLocalName();
+
+                performTask(pickUpName, destinationName);
             } catch (UnreadableException e) {
                 System.err.println("Failed to extract Task object from the received message.");
             }
         }
     }
 
-    private void performTask() {
-        Location originalLocation = new Location(getLocationPin());
+    private void performTask(String pickUpName, String destinationName) {
         if (currentTask != null) {
             CompletableFuture.runAsync(() -> {
-                moveToPosition(currentTask.getDestination());
+                LocationPin pickUpLocation = getLocationPinBlocking(pickUpName);
+                LocationPin destinationLocation = getLocationPinBlocking(destinationName);
+
+//                // go to pickup location
+//                pickUpLocation = getLocationPinBlocking(pickUpName);
+//                moveToPosition(pickUpLocation);
+//                // take it from the pick up location
+//
+//                // load it onto truck
+//                load += currentTask.getQuantity();
+//                double loadPercentage = (double) load / maxLoad;
+//                ((TruckData)getLocationPin().getAgentData()).setLoadPercentage(loadPercentage);
+//                updateLocationPinNonBlocking(this.getLocalName(), this.getLocationPin());
+//
+//                if (pickUpLocation.getAgentData() instanceof HasPercentage) {
+//                    ((HasPercentage) pickUpLocation.getAgentData()).(loadPercentage);
+//                }
+
+                moveToPosition(pickUpLocation);
+
+                moveToPosition(destinationLocation);
                 performDelivery();
-                moveToPosition(originalLocation);
+                //load -= currentTask.getQuantity();
+
+                moveToPosition(pickUpLocation);
                 currentTask = null;
             });
         }
@@ -84,7 +113,7 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDat
     private void performDelivery() {
         ACLMessage deliveryInstruction = new ACLMessage(ACLMessage.INFORM);
         deliveryInstruction.setConversationId(Constants.MSG_ID_DELIVERY_INSTRUCTION);
-        deliveryInstruction.addReceiver(currentTask.getRetailerAID());
+        deliveryInstruction.addReceiver(currentTask.getDestinationAID());
 
         try {
             deliveryInstruction.setContentObject(currentTask);
@@ -106,6 +135,15 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDat
     @Override
     public AgentData getAgentData() {
         return new TruckData();
+    }
+    @Override
+    public void locationUpdated(String agentName, LocationPin newLocationPin) {
+        if (agentName != this.getLocalName()) {
+            return;
+        }
+        super.locationUpdated(agentName, newLocationPin);
+        TruckData data = (TruckData)getLocationPin().getAgentData();
+        this.load = (int) data.getLoadPercentage() * maxLoad;
     }
 }
 

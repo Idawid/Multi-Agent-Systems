@@ -231,7 +231,7 @@ public abstract class BaseAgent extends Agent implements LocationMapObserver, Se
         locationPin.setLocation(tempLocation);
     }
 
-    private void updateLocationPinNonBlocking(String agentName, LocationPin location) {
+    protected void updateLocationPinNonBlocking(String agentName, LocationPin location) {
         CompletableFuture.runAsync(() -> {
             try {
                 LocationMap locationMap = (LocationMap) Naming.lookup(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT);
@@ -240,6 +240,15 @@ public abstract class BaseAgent extends Agent implements LocationMapObserver, Se
                 logger.log(Logger.WARNING, "Failed to update location on the remote map.");
             }
         });
+    }
+
+    protected LocationPin getLocationPinBlocking(String agentName) {
+        try {
+            LocationMap locationMap = (LocationMap) Naming.lookup(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT);
+            return locationMap.getLocationPin(agentName);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public LocationPin getLocationPin() {
@@ -272,8 +281,14 @@ public abstract class BaseAgent extends Agent implements LocationMapObserver, Se
 
     @Override
     public void locationUpdated(String agentName, LocationPin newLocationPin) {
-        // Agents don't handle LocationMap updates for now
-        return;
+        if (agentName != this.getLocalName()) {
+            return;
+        }
+        if (newLocationPin != null) {
+            this.setLocationPin(newLocationPin);
+        } else {
+            this.doDelete();
+        }
     }
     @Override
     public String getUniqueId() {

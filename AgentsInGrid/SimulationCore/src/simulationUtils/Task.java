@@ -9,16 +9,16 @@ import java.util.UUID;
 public class Task implements Serializable {
     private final UUID id;
     private Location destination;
+    private AID destinationAID;
     private ProductType product;
     private int quantity;
-    private AID retailerAID;
 
-    public Task(Location destination, ProductType product, int quantity, AID retailerAID) {
+    public Task(Location destination, ProductType product, int quantity, AID destinationAID) {
         this.id = UUID.randomUUID();
         this.destination = destination;
         this.product = product;
         this.quantity = quantity;
-        this.retailerAID = retailerAID;
+        this.destinationAID = destinationAID;
     }
 
     public UUID getId() {
@@ -49,11 +49,11 @@ public class Task implements Serializable {
         this.quantity = quantity;
     }
 
-    public AID getRetailerAID() {
-        return retailerAID;
+    public AID getDestinationAID() {
+        return destinationAID;
     }
 
-    public void setRetailerAID(AID retailerAID) {
-        this.retailerAID = retailerAID;
+    public void setDestinationAID(AID destinationAID) {
+        this.destinationAID = destinationAID;
     }
 }

@@ -67,8 +67,8 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
                 try {
                     Task task = (Task) deliveryRequest.getContentObject();
                     tasks.add(task);
-                    System.out.println(myAgent.getLocalName() + " got a request for a delivery from: " +
-                            task.getRetailerAID().getLocalName());
+//                    System.out.println(myAgent.getLocalName() + " got a request for a delivery from: " +
+//                            task.getRetailerAID().getLocalName());
                 } catch (UnreadableException e) {
                     System.err.println("Failed to extract Task object from the received message.");
                 }
@@ -111,8 +111,8 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                System.out.println(myAgent.getLocalName() + " asked truck: " + truckAID.getLocalName() +
-                        " for a delivery to: " + task.getRetailerAID().getLocalName());
+//                System.out.println(myAgent.getLocalName() + " asked truck: " + truckAID.getLocalName() +
+//                        " for a delivery to: " + task.getRetailerAID().getLocalName());
                 send(deliveryInstruction);
             }
         }
@@ -144,7 +144,7 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            System.out.println(myAgent.getLocalName() + " is asking " + warehouses.size() + " other warehouses to takeover his task");
+//            System.out.println(myAgent.getLocalName() + " is asking " + warehouses.size() + " other warehouses to takeover his task");
             send(askForTakeover);
         }
     }
@@ -175,8 +175,8 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
-                        System.out.println(myAgent.getLocalName() + " rejecting takeover from: "
-                                + takeoverRequest.getSender().getLocalName());
+//                        System.out.println(myAgent.getLocalName() + " rejecting takeover from: "
+//                                + takeoverRequest.getSender().getLocalName());
                         send(response);
                         return;
                     }
@@ -188,8 +188,8 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                    System.out.println(myAgent.getLocalName() + " accepting takeover from: "
-                            + takeoverRequest.getSender().getLocalName());
+//                    System.out.println(myAgent.getLocalName() + " accepting takeover from: "
+//                            + takeoverRequest.getSender().getLocalName());
                     send(response);
                 } catch (UnreadableException e) {
                     System.err.println("Failed to extract Task object from the received takeover request.");
@@ -228,14 +228,14 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
 
                     if (taskTakeoverCounter.get(task.getId()) == 0) {
                         if (taskTakeoverAcceptingWarehouses.get(task.getId()).isEmpty()) {
-                            System.out.println(myAgent.getLocalName() + " couldn't find any warehouse to takeover it's task");
+//                            System.out.println(myAgent.getLocalName() + " couldn't find any warehouse to takeover it's task");
                             tasks.add(task);
                             return;
                         }
                         WarehouseAgent chosenWarehouse = getClosestAgent(taskTakeoverAcceptingWarehouses.get(task.getId()),
                                 task.getDestination());
-                        System.out.println(myAgent.getLocalName() + " gave away his task to: " +
-                                chosenWarehouse.getLocalName());
+//                        System.out.println(myAgent.getLocalName() + " gave away his task to: " +
+//                                chosenWarehouse.getLocalName());
                         sendGiveawayMessage(chosenWarehouse.getAID(), task);
                         taskTakeoverAcceptingWarehouses.remove(task.getId());
                     }
