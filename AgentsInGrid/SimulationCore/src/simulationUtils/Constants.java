@@ -5,6 +5,7 @@ public class Constants {
     public static final String AGENT_WAREHOUSE_PREFIX = "WarehouseAgent_";
     public static final String AGENT_TRUCK_PREFIX = "TruckAgent_";
     public static final String AGENT_MAIN_HUB_PREFIX = "MainHub_";
+    public static final String AGENT_MECHANIC_PREFIX = "MechanicAgent_";
 
     public static final String CONTAINER_MAIN = "MainContainer";
     public static final String CONTAINER_RETAIL = "RetailContainer";

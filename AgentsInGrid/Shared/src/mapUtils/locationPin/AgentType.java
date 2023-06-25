@@ -7,8 +7,10 @@ import java.io.Serializable;
 public enum AgentType implements Serializable {
     AGENT_RETAILER,
     AGENT_TRUCK,
+    AGENT_TRUCK_BROKEN,
     AGENT_WAREHOUSE,
-    AGENT_MAIN_HUB;
+    AGENT_MAIN_HUB,
+    AGENT_MECHANIC;
 
     public static AgentType getByAgentClass(Class<? extends Agent> agentClass) {
         try {

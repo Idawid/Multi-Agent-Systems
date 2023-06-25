@@ -15,6 +15,8 @@ public class AgentIconProvider {
         iconMap.put(AgentType.AGENT_TRUCK, loadImage("truck_icon.png"));
         iconMap.put(AgentType.AGENT_WAREHOUSE, loadImage("warehouse_icon.png"));
         iconMap.put(AgentType.AGENT_MAIN_HUB, loadImage("main_hub_icon.png"));
+        iconMap.put(AgentType.AGENT_MECHANIC, loadImage("mechanic_icon.png"));
+        iconMap.put(AgentType.AGENT_TRUCK_BROKEN, loadImage("truck_broken_icon.png"));
     }
 
     private static Image loadImage(String iconName) {

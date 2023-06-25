@@ -1,6 +1,8 @@
 package agents;
 
+import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
@@ -9,6 +11,8 @@ import simulationUtils.Constants;
 import simulationUtils.Task;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -33,6 +37,9 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDat
     private CopyOnWriteArrayList<Integer> pastDeliveryTimes;
     private int maxLoad;
     private int load;
+    private boolean isBrokeDown = false;
+    private boolean isMovingToMechanic = false;
+
 
     public TruckAgent(Location location, int maxLoad) {
         super(location);
@@ -47,6 +54,7 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDat
         super.setup();
 
         addBehaviour(new ReceiveDeliveryInformBehaviour());
+        addBehaviour(new RaiseRoadEventBehaviour(this, 1000, 0.5));
     }
 
     private class ReceiveDeliveryInformBehaviour extends CyclicBehaviour {
@@ -73,6 +81,24 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDat
                 performTask(pickUpName, destinationName);
             } catch (UnreadableException e) {
                 System.err.println("Failed to extract Task object from the received message.");
+            }
+        }
+    }
+
+    private class RaiseRoadEventBehaviour extends TickerBehaviour {
+        private final double eventProbability;
+        private final Random random;
+        public RaiseRoadEventBehaviour(Agent a, long period, double eventProbabilityDenominator) {
+            super(a, period);
+            this.eventProbability = eventProbabilityDenominator;
+            this.random = new Random();
+        }
+
+        @Override
+        protected void onTick() {
+            if (random.nextDouble() <= eventProbability && currentTask != null) {
+                isBrokeDown = true;
+                setLocationPin(new LocationPin(locationPin.getLocation(), getAgentType(), getAgentData()));
             }
         }
     }
@@ -130,7 +156,7 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDat
 
     @Override
     public AgentType getAgentType() {
-        return AgentType.AGENT_TRUCK;
+        return isBrokeDown ? AgentType.AGENT_TRUCK_BROKEN : AgentType.AGENT_TRUCK;
     }
     @Override
     public AgentData getAgentData() {

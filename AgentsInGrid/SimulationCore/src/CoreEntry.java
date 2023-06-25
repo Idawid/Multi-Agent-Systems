@@ -1,4 +1,5 @@
 import agents.MainHub;
+import agents.MechanicAgent;
 import containers.MainContainer;
 import containers.RetailerContainer;
 import containers.WarehouseContainer;
@@ -39,6 +40,9 @@ public class CoreEntry {
         MainContainer mainContainer = new MainContainer(CONTAINER_MAIN);
         Location mainHubLocation = LocationInitializer.generateRandomLocation();
         mainContainer.addAgent(AGENT_MAIN_HUB_PREFIX + "0", new MainHub(mainHubLocation));
+        Location mechanicLocation = LocationInitializer.generateRandomLocation();
+        mainContainer.addAgent(AGENT_MECHANIC_PREFIX + "0", new MechanicAgent(mechanicLocation));
+
 
         // Load the locations for different retailers
         List<Location> retailerLocations = LocationInitializer.generateRandomLocations(5);
