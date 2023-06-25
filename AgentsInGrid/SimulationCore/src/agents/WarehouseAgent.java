@@ -29,8 +29,6 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
     // TODO [1] exchanging stock:
     //  - if over max stock try to exchange request negative, if 0 stock request positive
 
-    // TODO [1] exchanging tasks:
-    //  - pass the task to another warehouse (maybe request task-> check if more than 3? tasks-> pass the task)
 
     private TruckAssignmentStrategy truckAssignmentStrategy;
     private List<Task> tasks;
