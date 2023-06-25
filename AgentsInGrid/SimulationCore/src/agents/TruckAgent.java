@@ -6,6 +6,7 @@ import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
+import mapUtils.LocationMap;
 import mapUtils.locationPin.*;
 import simulationUtils.Constants;
 import simulationUtils.Task;
@@ -19,9 +20,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDataProvider {
     // TODO [1] stock:
     //  - truck needs to have stock (max stock, current load, percentage?)
-
-    // TODO [1] road events:
-    //  - the move may be interrupted, slowed down
 
     // TODO [1] time estimate:
     //  - instead of t=s/v from the based on the distance from truck to retailer
@@ -104,6 +102,7 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDat
     }
 
     private void performTask(String pickUpName, String destinationName) {
+        Location originalLocation = new Location(getLocationPin());
         if (currentTask != null) {
             CompletableFuture.runAsync(() -> {
                 LocationPin pickUpLocation = getLocationPinBlocking(pickUpName);
@@ -171,5 +170,59 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDat
         TruckData data = (TruckData)getLocationPin().getAgentData();
         this.load = (int) data.getLoadPercentage() * maxLoad;
     }
+
+    private void moveToPosition(Location targetLocation) {
+        LocationPin startLocation = new LocationPin(locationPin);
+        LocationPin tempLocation = new LocationPin(locationPin);
+        String keyName = getLocalName();
+
+        int timeInMilliseconds = (int) (startLocation.getDistance(targetLocation) * 1000) / 60;
+        int totalSteps = timeInMilliseconds * LocationMap.UPDATES_PER_SECOND / 1000 ;
+        int currentSteps = 0;
+        double stepX = ((double) targetLocation.getX() - startLocation.getX()) / totalSteps;
+        double stepY = ((double) targetLocation.getY() - startLocation.getY()) / totalSteps;
+
+        for (int i = 0; i < totalSteps; i++) {
+//            if (isBrokeDown && !isMovingToMechanic) {
+//                locationPin.setLocation(tempLocation);
+//                handleBrakeDown();
+//                return;
+//            }
+            tempLocation.setX(startLocation.getX() + (int) (currentSteps * stepX));
+            tempLocation.setY(startLocation.getY() + (int) (currentSteps * stepY));
+            currentSteps++;
+
+            updateLocationPinNonBlocking(keyName, tempLocation);
+
+            try {
+                Thread.sleep(1000 / LocationMap.UPDATES_PER_SECOND);
+            } catch (InterruptedException e) { }
+        }
+        locationPin.setLocation(tempLocation);
+    }
+
+    private void handleBrakeDown() {
+        List<MechanicAgent> mechanics = (List<MechanicAgent>) findAgentsByClass(MechanicAgent.class);
+        if (mechanics == null || mechanics.isEmpty()) {
+            throw new RuntimeException("Truck cant find a mechanic");
+        }
+        if (currentTask != null) {
+            ACLMessage informWarehouse = new ACLMessage(ACLMessage.INFORM);
+            informWarehouse.setConversationId(Constants.MSG_ID_DELIVERY_INFORM);
+            try {
+                informWarehouse.setContentObject(currentTask);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            //informWarehouse.addReceiver(currentTask.get);
+            send(informWarehouse);
+        }
+
+        // Nice to have: introduce more mechanics
+        MechanicAgent chosenMechanic = mechanics.get(0);
+
+        moveToPosition(chosenMechanic.getLocation());
+    }
+
 }
 
