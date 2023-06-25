@@ -6,6 +6,7 @@ import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
+import mapUtils.LocationMap;
 import mapUtils.locationPin.*;
 import simulationUtils.Constants;
 import simulationUtils.Task;
@@ -134,6 +135,37 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDat
                 currentTask = null;
             });
         }
+    }
+
+
+    private void moveToPosition(Location targetLocation) {
+        LocationPin startLocation = new LocationPin(locationPin);
+        LocationPin tempLocation = new LocationPin(locationPin);
+        String keyName = getLocalName();
+
+        int timeInMilliseconds = (int) (startLocation.getDistance(targetLocation) * 1000) / 60;
+        int totalSteps = timeInMilliseconds * LocationMap.UPDATES_PER_SECOND / 1000 ;
+        int currentSteps = 0;
+        double stepX = ((double) targetLocation.getX() - startLocation.getX()) / totalSteps;
+        double stepY = ((double) targetLocation.getY() - startLocation.getY()) / totalSteps;
+
+        for (int i = 0; i < totalSteps; i++) {
+//            if (isBrokeDown && !isMovingToMechanic) {
+//                locationPin.setLocation(tempLocation);
+//                handleBrakeDown();
+//                return;
+//            }
+            tempLocation.setX(startLocation.getX() + (int) (currentSteps * stepX));
+            tempLocation.setY(startLocation.getY() + (int) (currentSteps * stepY));
+            currentSteps++;
+
+            updateLocationPinNonBlocking(keyName, tempLocation);
+
+            try {
+                Thread.sleep(1000 / LocationMap.UPDATES_PER_SECOND);
+            } catch (InterruptedException e) { }
+        }
+        locationPin.setLocation(tempLocation);
     }
 
     private void performDelivery() {
