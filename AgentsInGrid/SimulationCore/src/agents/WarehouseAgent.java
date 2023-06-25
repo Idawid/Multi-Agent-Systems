@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, AgentDataProvider {
     // TODO [1] stock:
@@ -32,10 +33,9 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
     //  - pass the task to another warehouse (maybe request task-> check if more than 3? tasks-> pass the task)
 
     private TruckAssignmentStrategy truckAssignmentStrategy;
-    private WarehouseAssignmentStrategy warehouseAssignmentStrategy;
     private List<Task> tasks;
-    private HashMap<Task, List<WarehouseAgent>> taskTakeoverAcceptingWarehouses;
-    private HashMap<Task, Integer> taskTakeoverCounter;
+    private HashMap<UUID, List<WarehouseAgent>> taskTakeoverAcceptingWarehouses;
+    private HashMap<UUID, Integer> taskTakeoverCounter;
 
     public WarehouseAgent(Location location) {
         super(location);
@@ -48,7 +48,6 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
 
         this.tasks = new ArrayList<>();
         truckAssignmentStrategy = new RandomAssignmentStrategy();
-        warehouseAssignmentStrategy = new ProximityBasedAssignmentStrategy();
         taskTakeoverAcceptingWarehouses = new HashMap<>();
         taskTakeoverCounter = new HashMap<>();
 
@@ -68,8 +67,8 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
                 try {
                     Task task = (Task) deliveryRequest.getContentObject();
                     tasks.add(task);
-//                    System.out.println(myAgent.getLocalName() + " got a request for a delivery from: " +
-//                            task.getRetailerAID().getLocalName());
+                    System.out.println(myAgent.getLocalName() + " got a request for a delivery from: " +
+                            task.getRetailerAID().getLocalName());
                 } catch (UnreadableException e) {
                     System.err.println("Failed to extract Task object from the received message.");
                 }
@@ -112,8 +111,8 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-//                System.out.println(myAgent.getLocalName() + " asked truck: " + truckAID.getLocalName() +
-//                        " for a delivery to: " + task.getRetailerAID().getLocalName());
+                System.out.println(myAgent.getLocalName() + " asked truck: " + truckAID.getLocalName() +
+                        " for a delivery to: " + task.getRetailerAID().getLocalName());
                 send(deliveryInstruction);
             }
         }
@@ -128,14 +127,14 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
                 return;
             }
             //System.out.println("debug - askOtherStart warehouses not null " + myAgent.getLocalName());
-            warehouses.remove((WarehouseAgent) myAgent);
+            warehouses.removeIf(warehouseAgent -> warehouseAgent.getAID().equals(myAgent.getAID()));
             if (warehouses.isEmpty()) {
                 tasks.add(task);
                 return;
             }
-            //System.out.println("debug - askOther send propose " + myAgent.getLocalName());
-            taskTakeoverCounter.put(task, warehouses.size());
-            taskTakeoverAcceptingWarehouses.put(task, new ArrayList<>());
+//            System.out.println("debug - put counter on key " + task.getId());
+            taskTakeoverCounter.put(task.getId(), warehouses.size());
+            taskTakeoverAcceptingWarehouses.put(task.getId(), new ArrayList<>());
 
             ACLMessage askForTakeover = new ACLMessage(ACLMessage.PROPOSE);
             askForTakeover.setConversationId(Constants.MSG_ID_TASK_TAKEOVER_REQUEST);
@@ -145,7 +144,7 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            //System.out.println(myAgent.getLocalName() + " is asking " + warehouses.size() + " other warehouses to takeover his task");
+            System.out.println(myAgent.getLocalName() + " is asking " + warehouses.size() + " other warehouses to takeover his task");
             send(askForTakeover);
         }
     }
@@ -176,7 +175,8 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
-                        //System.out.println(myAgent.getLocalName() + " rejecting takeover");
+                        System.out.println(myAgent.getLocalName() + " rejecting takeover from: "
+                                + takeoverRequest.getSender().getLocalName());
                         send(response);
                         return;
                     }
@@ -188,7 +188,8 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                    //System.out.println(myAgent.getLocalName() + " accepting takeover");
+                    System.out.println(myAgent.getLocalName() + " accepting takeover from: "
+                            + takeoverRequest.getSender().getLocalName());
                     send(response);
                 } catch (UnreadableException e) {
                     System.err.println("Failed to extract Task object from the received takeover request.");
@@ -209,31 +210,34 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
             if (takeoverResponse != null) {
                 try {
                     Task task = (Task) takeoverResponse.getContentObject();
-                    if (!taskTakeoverCounter.containsKey(task)) {
-                        System.err.println("Got a takeover response when a counter for given task doesn't exist");
+                    if (!taskTakeoverCounter.containsKey(task.getId())) {
+                        System.err.println(myAgent.getLocalName() + " got a takeover response from "
+                                + takeoverResponse.getSender().getLocalName()
+                                + " when a counter for given task doesn't exist");
                         return;
                     }
-                    taskTakeoverCounter.put(task, taskTakeoverCounter.get(task)-1);
-                    if (!taskTakeoverAcceptingWarehouses.containsKey(task)) {
-                        taskTakeoverAcceptingWarehouses.put(task, new ArrayList<>());
+//                    System.out.println("debug - decrementing from value " );
+                    taskTakeoverCounter.put(task.getId(), taskTakeoverCounter.get(task.getId())-1);
+                    if (!taskTakeoverAcceptingWarehouses.containsKey(task.getId())) {
+                        taskTakeoverAcceptingWarehouses.put(task.getId(), new ArrayList<>());
                     }
                     if (takeoverResponse.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
-                        taskTakeoverAcceptingWarehouses.get(task).add((WarehouseAgent) (
+                        taskTakeoverAcceptingWarehouses.get(task.getId()).add((WarehouseAgent) (
                                 (WarehouseAgent) myAgent).requestAgentInstance(takeoverResponse.getSender()));
                     }
 
-                    if (taskTakeoverCounter.get(task) == 0) {
-                        if (taskTakeoverAcceptingWarehouses.get(task).isEmpty()) {
-                            //System.out.println(myAgent.getLocalName() + " couldn't find any warehouse to takeover it's task");
+                    if (taskTakeoverCounter.get(task.getId()) == 0) {
+                        if (taskTakeoverAcceptingWarehouses.get(task.getId()).isEmpty()) {
+                            System.out.println(myAgent.getLocalName() + " couldn't find any warehouse to takeover it's task");
                             tasks.add(task);
                             return;
                         }
-                        WarehouseAgent chosenWarehouse = getClosestAgent(taskTakeoverAcceptingWarehouses.get(task),
+                        WarehouseAgent chosenWarehouse = getClosestAgent(taskTakeoverAcceptingWarehouses.get(task.getId()),
                                 task.getDestination());
-//                        System.out.println(myAgent.getLocalName() + " gave away his task to: " +
-//                                chosenWarehouse.getLocalName());
+                        System.out.println(myAgent.getLocalName() + " gave away his task to: " +
+                                chosenWarehouse.getLocalName());
                         sendGiveawayMessage(chosenWarehouse.getAID(), task);
-                        taskTakeoverAcceptingWarehouses.remove(task);
+                        taskTakeoverAcceptingWarehouses.remove(task.getId());
                     }
 
                 } catch (UnreadableException e) {
