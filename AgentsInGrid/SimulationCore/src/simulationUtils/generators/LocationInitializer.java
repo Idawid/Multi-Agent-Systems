@@ -9,10 +9,12 @@ import java.util.Random;
 
 public class LocationInitializer {
     public static Location generateRandomLocation() {
-        return generateRandomLocations(1, 0, MapConfig.MAP_BOUND_X, 0, MapConfig.MAP_BOUND_Y).get(0);
+        return generateRandomLocations(1, (MapConfig.MAP_BOUND_X * 10)/100, (MapConfig.MAP_BOUND_X * 90)/100,
+                (MapConfig.MAP_BOUND_Y * 10)/100, (MapConfig.MAP_BOUND_Y * 90)/100).get(0);
     }
     public static List<Location> generateRandomLocations(int numLocations) {
-        return generateRandomLocations(numLocations, 0, MapConfig.MAP_BOUND_X, 0, MapConfig.MAP_BOUND_Y);
+        return generateRandomLocations(numLocations, (MapConfig.MAP_BOUND_X * 10)/100, (MapConfig.MAP_BOUND_X * 90)/100,
+                (MapConfig.MAP_BOUND_Y * 10)/100, (MapConfig.MAP_BOUND_Y * 90)/100);
     }
     public static List<Location> generateRandomLocations(int numLocations, int minX, int maxX, int minY, int maxY) {
         List<Location> locations = new ArrayList<>();

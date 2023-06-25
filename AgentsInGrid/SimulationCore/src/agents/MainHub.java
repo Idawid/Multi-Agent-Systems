@@ -32,6 +32,7 @@ public class MainHub extends BaseAgent implements AgentTypeProvider, AgentDataPr
     private class ReceiveDeliveryRequestBehaviour extends CyclicBehaviour {
         @Override
         public void action() {
+            //System.out.println(myAgent.getLocalName() + " runs whatever he's not supposed to");
             MessageTemplate requestTemplate = MessageTemplate.MatchConversationId(Constants.MSG_ID_DELIVERY_REQUEST);
             ACLMessage deliveryRequest = myAgent.receive(requestTemplate);
 

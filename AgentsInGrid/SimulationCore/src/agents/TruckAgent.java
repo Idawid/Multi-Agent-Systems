@@ -9,9 +9,8 @@ import simulationUtils.Constants;
 import simulationUtils.Task;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDataProvider {
     // TODO [1] stock:
@@ -31,13 +30,13 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDat
     //  - multiple tasks, varied tasks, all use the same stock
 
     private Task currentTask = null;
-    private List<Integer> pastDeliveryTimes;
+    private CopyOnWriteArrayList<Integer> pastDeliveryTimes;
     private int maxLoad;
     private int load;
 
     public TruckAgent(Location location, int maxLoad) {
         super(location);
-        this.pastDeliveryTimes = new ArrayList<>();
+        this.pastDeliveryTimes = new CopyOnWriteArrayList<>();
         this.load = 0;
         this.maxLoad = maxLoad;
     }
@@ -62,7 +61,7 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDat
             }
             try {
                 currentTask = (Task) deliveryRequest.getContentObject();
-                System.out.println(myAgent.getLocalName() + " got assigned a task!");
+                //System.out.println(myAgent.getLocalName() + " got assigned a task!");
                 performTask();
             } catch (UnreadableException e) {
                 System.err.println("Failed to extract Task object from the received message.");
