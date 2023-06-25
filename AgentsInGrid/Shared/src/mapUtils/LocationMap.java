@@ -1,6 +1,5 @@
 package mapUtils;
 
-import mapUtils.locationPin.AgentData;
 import mapUtils.locationPin.LocationPin;
 
 import java.rmi.Remote;
@@ -8,8 +7,8 @@ import java.rmi.RemoteException;
 import java.util.concurrent.ConcurrentMap;
 
 public interface LocationMap extends Remote {
-    public static final String REMOTE_LOCATION_MAP_ENDPOINT = "rmi://localhost/locationMap";
-    public static final int UPDATES_PER_SECOND = 10;
+    String REMOTE_LOCATION_MAP_ENDPOINT = "rmi://localhost/locationMap";
+    int UPDATES_PER_SECOND = 10;
     int getMapBoundX() throws RemoteException;
     int getMapBoundY() throws RemoteException;
     ConcurrentMap<String, LocationPin> getLocationPins() throws RemoteException;

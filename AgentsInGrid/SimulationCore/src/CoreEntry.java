@@ -6,28 +6,34 @@ import mapUtils.locationPin.Location;
 import simulationUtils.generators.LocationInitializer;
 import mapUtils.*;
 
+import java.net.MalformedURLException;
 import java.rmi.Naming;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static mapUtils.RemoteUtils.wrapRemoteExceptionSupplier;
 import static simulationUtils.Constants.*;
 
 public class CoreEntry {
     public static void main(String[] args) {
 
-        try {
-            // RMI setup
-            LocateRegistry.createRegistry(1099);
-            LocationMap locationMap = new LocationMapImpl();
-            UnicastRemoteObject.unexportObject(locationMap, true);
-            LocationMap stub = (LocationMap) UnicastRemoteObject.exportObject(locationMap, 0);
-            Naming.rebind(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT, stub);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        // RMI setup
+        wrapRemoteExceptionSupplier(() -> LocateRegistry.createRegistry(1099)).get();
+        LocationMap locationMap = wrapRemoteExceptionSupplier(LocationMapImpl::new).get();
+        wrapRemoteExceptionSupplier(() -> UnicastRemoteObject.unexportObject(locationMap, true)).get();
+        LocationMap stub = wrapRemoteExceptionSupplier(() -> (LocationMap) UnicastRemoteObject.exportObject(locationMap, 0)).get();
+        wrapRemoteExceptionSupplier(() -> {
+            try {
+                Naming.rebind(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT, stub);
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
+            return null;
+        }).get();
 
         // Initialize the main container, required
         MainContainer mainContainer = new MainContainer(CONTAINER_MAIN);

@@ -143,6 +143,17 @@ public abstract class BaseAgent extends Agent implements LocationMapObserver, Se
                         response.setContentObject(agent);
                         response.addReceiver(request.getSender());
 
+                        // debug - object size
+//                        Object object = response.getContentObject();
+//                        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+//                        new ObjectOutputStream(byteStream).writeObject(object);
+//
+//                        long size = byteStream.toByteArray().length;
+//                        System.out.println("Object size: " + size + " bytes");
+//
+//                        byteStream.close();
+                        // end debug - object size
+
                         agent.send(response);
                     } catch (IOException e) {
                         if (e instanceof NotSerializableException) {
@@ -259,8 +270,13 @@ public abstract class BaseAgent extends Agent implements LocationMapObserver, Se
         return port;
     }
 
-    public void locationUpdated(String agentName, LocationPin newLocationPin) throws RemoteException {
+    @Override
+    public void locationUpdated(String agentName, LocationPin newLocationPin) {
         // Agents don't handle LocationMap updates for now
         return;
+    }
+    @Override
+    public String getUniqueId() {
+        return this.getLocalName();
     }
 }

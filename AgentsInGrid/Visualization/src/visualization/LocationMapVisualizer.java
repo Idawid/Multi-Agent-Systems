@@ -15,23 +15,16 @@ import mapUtils.locationPin.LocationPin;
 import visualizationUtils.IconContainerBuilder;
 
 import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
-import java.util.HashMap;
 import java.util.Map;
 
-public class LocationMapVisualizer extends Application implements LocationMapObserver, Serializable {
+public class LocationMapVisualizer extends Application implements LocationMapObserver {
     private static final int MAP_WIDTH = MapConfig.MAP_BOUND_X;
     private static final int MAP_HEIGHT = MapConfig.MAP_BOUND_Y;
     private static final int GRID_SIZE = 20;
 
-    private Map<String, LocationPin> locationPins = new HashMap<>();
     private Pane root;
-    private LocationMap locationMap;
-    private LocationMapObserverProxy proxy;
 
     @Override
     public void start(Stage primaryStage) {
@@ -79,23 +72,20 @@ public class LocationMapVisualizer extends Application implements LocationMapObs
     }
 
     public void initLocationPins() {
-        try {
-            this.locationPins = new HashMap<>(locationMap.getLocationPins());
-            refreshVisualization();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void refreshVisualization() {
         if (root == null) {
             return;
         }
+
         removeAllIcons();
-        for (Map.Entry<String, LocationPin> entry : locationPins.entrySet()) {
-            String pinName = entry.getKey();
-            LocationPin pin = entry.getValue();
-            addIcon(pinName, pin);
+        try {
+            LocationMap locationMap = (LocationMap) Naming.lookup(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT);
+            for (Map.Entry<String, LocationPin> entry : locationMap.getLocationPins().entrySet()) {
+                String pinName = entry.getKey();
+                LocationPin pin = entry.getValue();
+                addIcon(pinName, pin);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -133,9 +123,8 @@ public class LocationMapVisualizer extends Application implements LocationMapObs
 
     private void registerWithLocationMap() {
         try {
-            locationMap = (LocationMap) Naming.lookup(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT);
-            this.proxy = new LocationMapObserverProxy(this);
-            locationMap.registerObserver(this.proxy);
+            LocationMap locationMap = (LocationMap) Naming.lookup(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT);
+            locationMap.registerObserver(new LocationMapObserverProxy(this));
         } catch (Exception e) {
             e.printStackTrace();
             Platform.exit();
@@ -143,7 +132,8 @@ public class LocationMapVisualizer extends Application implements LocationMapObs
     }
     private void deregisterFromLocationMap() {
         try {
-            locationMap.unregisterObserver(this.proxy);
+            LocationMap locationMap = (LocationMap) Naming.lookup(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT);
+            locationMap.unregisterObserver(new LocationMapObserverProxy(this));
         } catch (Exception e) {
             e.printStackTrace();
             Platform.exit();
@@ -158,5 +148,10 @@ public class LocationMapVisualizer extends Application implements LocationMapObs
                 addIcon(agentName, newLocationPin);
             }
         });
+    }
+
+    @Override
+    public String getUniqueId() {
+        return this.getClass().getSimpleName();
     }
 }
