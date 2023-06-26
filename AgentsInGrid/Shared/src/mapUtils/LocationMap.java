@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public interface LocationMap extends Remote {
     String REMOTE_LOCATION_MAP_ENDPOINT = "rmi://localhost/locationMap";
-    int UPDATES_PER_SECOND = 10;
+    int UPDATES_PER_SECOND = 30;
     int getMapBoundX() throws RemoteException;
     int getMapBoundY() throws RemoteException;
     ConcurrentMap<String, LocationPin> getLocationPins() throws RemoteException;

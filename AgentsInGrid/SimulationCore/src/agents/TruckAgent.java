@@ -9,18 +9,14 @@ import jade.lang.acl.UnreadableException;
 import mapUtils.LocationMap;
 import mapUtils.locationPin.*;
 import simulationUtils.Constants;
-import simulationUtils.Task;
+import simulationUtils.task.Task;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDataProvider {
-    // TODO [1] stock:
-    //  - truck needs to have stock (max stock, current load, percentage?)
-
     // TODO [1] road events:
     //  - the move may be interrupted, slowed down
 
@@ -31,22 +27,14 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDat
     //  - instead of t=s/v
     //  - how to gather information about the move, and what can WarehouseAgent do with that (???)
 
-    // TODO [3] task chains:
-    //  - multiple tasks, varied tasks, all use the same stock
-
     private Task currentTask = null;
     private CopyOnWriteArrayList<Integer> pastDeliveryTimes;
-    private int maxLoad;
-    private int load;
     private boolean isBrokeDown = false;
     private boolean isMovingToMechanic = false;
 
-
-    public TruckAgent(Location location, int maxLoad) {
+    public TruckAgent(Location location) {
         super(location);
         this.pastDeliveryTimes = new CopyOnWriteArrayList<>();
-        this.load = 0;
-        this.maxLoad = maxLoad;
     }
 
     public TruckAgent() { }
@@ -75,11 +63,7 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDat
 
             try {
                 currentTask = (Task) deliveryRequest.getContentObject();
-
-                String pickUpName = deliveryRequest.getSender().getLocalName();
-                String destinationName = currentTask.getDestinationAID().getLocalName();
-
-                performTask(pickUpName, destinationName);
+                performTask();
             } catch (UnreadableException e) {
                 System.err.println("Failed to extract Task object from the received message.");
             }
@@ -104,82 +88,13 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDat
         }
     }
 
-    private void performTask(String pickUpName, String destinationName) {
+    private void performTask() {
         if (currentTask != null) {
             CompletableFuture.runAsync(() -> {
-                LocationPin pickUpLocation = getLocationPinBlocking(pickUpName);
-                LocationPin destinationLocation = getLocationPinBlocking(destinationName);
-
-//                // go to pickup location
-//                pickUpLocation = getLocationPinBlocking(pickUpName);
-//                moveToPosition(pickUpLocation);
-//                // take it from the pick up location
-//
-//                // load it onto truck
-//                load += currentTask.getQuantity();
-//                double loadPercentage = (double) load / maxLoad;
-//                ((TruckData)getLocationPin().getAgentData()).setLoadPercentage(loadPercentage);
-//                updateLocationPinNonBlocking(this.getLocalName(), this.getLocationPin());
-//
-//                if (pickUpLocation.getAgentData() instanceof HasPercentage) {
-//                    ((HasPercentage) pickUpLocation.getAgentData()).(loadPercentage);
-//                }
-
-                moveToPosition(pickUpLocation);
-
-                moveToPosition(destinationLocation);
-                performDelivery();
-                //load -= currentTask.getQuantity();
-
-                moveToPosition(pickUpLocation);
+                currentTask.execute();
                 currentTask = null;
             });
         }
-    }
-
-
-    private void moveToPosition(Location targetLocation) {
-        LocationPin startLocation = new LocationPin(locationPin);
-        LocationPin tempLocation = new LocationPin(locationPin);
-        String keyName = getLocalName();
-
-        int timeInMilliseconds = (int) (startLocation.getDistance(targetLocation) * 1000) / 60;
-        int totalSteps = timeInMilliseconds * LocationMap.UPDATES_PER_SECOND / 1000 ;
-        int currentSteps = 0;
-        double stepX = ((double) targetLocation.getX() - startLocation.getX()) / totalSteps;
-        double stepY = ((double) targetLocation.getY() - startLocation.getY()) / totalSteps;
-
-        for (int i = 0; i < totalSteps; i++) {
-//            if (isBrokeDown && !isMovingToMechanic) {
-//                locationPin.setLocation(tempLocation);
-//                handleBrakeDown();
-//                return;
-//            }
-            tempLocation.setX(startLocation.getX() + (int) (currentSteps * stepX));
-            tempLocation.setY(startLocation.getY() + (int) (currentSteps * stepY));
-            currentSteps++;
-
-            updateLocationPinNonBlocking(keyName, tempLocation);
-
-            try {
-                Thread.sleep(1000 / LocationMap.UPDATES_PER_SECOND);
-            } catch (InterruptedException e) { }
-        }
-        locationPin.setLocation(tempLocation);
-    }
-
-    private void performDelivery() {
-        ACLMessage deliveryInstruction = new ACLMessage(ACLMessage.INFORM);
-        deliveryInstruction.setConversationId(Constants.MSG_ID_DELIVERY_INSTRUCTION);
-        deliveryInstruction.addReceiver(currentTask.getDestinationAID());
-
-        try {
-            deliveryInstruction.setContentObject(currentTask);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        send(deliveryInstruction);
     }
 
     public Task getCurrentTask() {
@@ -194,14 +109,18 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDat
     public AgentData getAgentData() {
         return new TruckData();
     }
+
     @Override
     public void locationUpdated(String agentName, LocationPin newLocationPin) {
         if (agentName != this.getLocalName()) {
             return;
         }
-        super.locationUpdated(agentName, newLocationPin);
-        TruckData data = (TruckData)getLocationPin().getAgentData();
-        this.load = (int) data.getLoadPercentage() * maxLoad;
+
+        if (newLocationPin != null) {
+            this.setLocationPin(newLocationPin);
+        } else {
+            this.doDelete();
+        }
     }
 }
 

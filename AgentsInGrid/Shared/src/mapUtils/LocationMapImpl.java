@@ -12,10 +12,6 @@ import java.util.concurrent.ConcurrentMap;
 import static mapUtils.RemoteUtils.wrapRemoteExceptionSupplier;
 
 public class LocationMapImpl extends UnicastRemoteObject implements LocationMap {
-    // TODO [2] event type (add / delete)
-    //  - maybe pass the null? somehow let the observer know what happened,
-    //          so he doesn't need to sync the whole map, but just this changed pin
-
     private final int mapBoundX;
     private final int mapBoundY;
     private final ConcurrentMap<String, LocationPin> locationPins;

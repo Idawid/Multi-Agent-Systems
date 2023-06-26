@@ -2,8 +2,8 @@ package simulationUtils.generators;
 
 import jade.core.AID;
 import mapUtils.locationPin.Location;
-import simulationUtils.ProductType;
-import simulationUtils.Task;
+import simulationUtils.task.ProductType;
+import simulationUtils.Order;
 
 import java.util.Random;
 
@@ -12,13 +12,13 @@ public class OrderGenerator {
     private static final int MIN_QUANTITY = 1;
     private static final int MAX_QUANTITY = 10;
 
-    public static Task generateRandomOrder(Location destination, AID retailerAID) {
+    public static Order generateRandomOrder(Location destination, AID retailerAID) {
         Random random = new Random();
 
         ProductType randomProduct = getRandomProduct(random);
         int randomQuantity = getRandomQuantity(random);
 
-        Task order = new Task(destination, randomProduct, randomQuantity, retailerAID);
+        Order order = new Order(destination, randomProduct, randomQuantity, retailerAID);
 
         return order;
     }

@@ -2,10 +2,10 @@ package simulationUtils.assignmentStrategies.truck;
 
 import agents.TruckAgent;
 import jade.core.AID;
-import simulationUtils.Task;
+import simulationUtils.Order;
 
 import java.util.List;
 
 public interface TruckAssignmentStrategy {
-    AID assignTruckAgent(Task task, List<TruckAgent> warehouses);
+    AID assignTruckAgent(Order order, List<TruckAgent> warehouses);
 }

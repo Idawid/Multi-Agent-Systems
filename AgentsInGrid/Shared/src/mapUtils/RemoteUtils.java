@@ -1,7 +1,6 @@
 package mapUtils;
 
 import java.rmi.RemoteException;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class RemoteUtils {

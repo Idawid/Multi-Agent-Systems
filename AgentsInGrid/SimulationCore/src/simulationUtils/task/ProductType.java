@@ -1,4 +1,4 @@
-package simulationUtils;
+package simulationUtils.task;
 
 import java.io.Serializable;
 

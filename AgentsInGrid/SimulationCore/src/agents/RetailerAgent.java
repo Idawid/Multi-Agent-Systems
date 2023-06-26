@@ -11,8 +11,8 @@ import jade.util.Logger;
 import mapUtils.LocationMap;
 import mapUtils.locationPin.*;
 import simulationUtils.Constants;
-import simulationUtils.ProductType;
-import simulationUtils.Task;
+import simulationUtils.task.ProductType;
+import simulationUtils.Order;
 import simulationUtils.generators.OrderGenerator;
 
 import java.rmi.Naming;
@@ -36,12 +36,11 @@ public class RetailerAgent extends BaseAgent implements AgentTypeProvider, Agent
         super.setup();
 
         addBehaviour(new SendDeliveryRequestBehaviour(this));
-        addBehaviour(new ReceiveDeliveryInstructionsBehaviour());
     }
 
     private class SendDeliveryRequestBehaviour extends TickerBehaviour {
         public SendDeliveryRequestBehaviour(Agent a) {
-            super(a, 1000);
+            this(a, 1000);
         }
         public SendDeliveryRequestBehaviour(Agent a, long period) {
             super(a, period);
@@ -57,7 +56,7 @@ public class RetailerAgent extends BaseAgent implements AgentTypeProvider, Agent
                     deliveryRequest.setConversationId(Constants.MSG_ID_DELIVERY_REQUEST);
                     deliveryRequest.addReceiver(mainHubAID);
 
-                    Task request = OrderGenerator.generateRandomOrder(((RetailerAgent)myAgent).getLocation(), myAgent.getAID());
+                    Order request = OrderGenerator.generateRandomOrder(((RetailerAgent)myAgent).getLocation(), myAgent.getAID());
                     deliveryRequest.setContentObject(request);
 
                     send(deliveryRequest);
@@ -70,42 +69,6 @@ public class RetailerAgent extends BaseAgent implements AgentTypeProvider, Agent
 
             // Randomizes the delivery request intervals
             reset(getRandomDeliveryInterval());
-        }
-    }
-
-    private class ReceiveDeliveryInstructionsBehaviour extends CyclicBehaviour {
-        public void action() {
-            MessageTemplate mt = MessageTemplate.MatchConversationId(Constants.MSG_ID_DELIVERY_INSTRUCTION);
-            ACLMessage deliveryInstructions = receive(mt);
-
-            if (deliveryInstructions != null) {
-                try {
-                    Task order = (Task) deliveryInstructions.getContentObject();
-                    sell(order);
-                } catch (UnreadableException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                block();
-            }
-        }
-    }
-
-    private void sell(Task order) {
-        ProductType productType = order.getProduct();
-        int quantity = order.getQuantity();
-
-        double rate = productType.getRate();
-        double profits = rate * quantity;
-
-        RetailerData retailerData = (RetailerData) this.getLocationPin().getAgentData();
-        retailerData.setProfit(retailerData.getProfit() + profits);
-
-        try {
-            LocationMap locationMap = (LocationMap) Naming.lookup(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT);
-            locationMap.updateLocationPin(this.getLocalName(), this.getLocationPin());
-        } catch (Exception e) {
-            this.logger.log(Logger.WARNING, "Failed to update location on the remote map.");
         }
     }
 

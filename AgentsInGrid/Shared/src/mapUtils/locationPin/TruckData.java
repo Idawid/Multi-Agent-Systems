@@ -1,25 +1,34 @@
 package mapUtils.locationPin;
 
-public class TruckData implements AgentData, HasPercentage {
-    private double loadPercentage = 0;
+public class TruckData extends IsMoveable implements AgentData, HasStock {
+    private int currentLoad = 0;
+    private int maxLoad = 10;
 
     public TruckData() {
         new TruckData(0);
     }
-    public TruckData(double loadPercentage) {
-        this.loadPercentage = loadPercentage;
-    }
-
-    public double getLoadPercentage() {
-        return loadPercentage;
-    }
-
-    public void setLoadPercentage(double loadPercentage) {
-        this.loadPercentage = loadPercentage;
+    public TruckData(int maxLoad) {
+        this.currentLoad = 0;
+        this.maxLoad = maxLoad;
     }
 
     @Override
-    public double getPercentage() {
-        return loadPercentage;
+    public int getCurrentStock() {
+        return currentLoad;
+    }
+
+    @Override
+    public int getMaxStock() {
+        return maxLoad;
+    }
+
+    @Override
+    public void addCurrentStock(int quantity) {
+        this.currentLoad += quantity;
+    }
+
+    @Override
+    public void reserveStock(int quantity) {
+        return;
     }
 }

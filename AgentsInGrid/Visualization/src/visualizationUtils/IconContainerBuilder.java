@@ -47,9 +47,9 @@ public class IconContainerBuilder {
         return icon;
     }
 
-    private static ImageView createProgressBar(HasPercentage percentageProvider) {
+    private static ImageView createProgressBar(HasStock stockProvider) {
         String progressBarPath;
-        double percentage = percentageProvider.getPercentage();
+        double percentage = (double) stockProvider.getCurrentStock() * 100 / stockProvider.getMaxStock();
         if (percentage < 20) {
             progressBarPath = "progress-bar-empty.png";
         } else if (percentage < 40) {
@@ -84,8 +84,8 @@ public class IconContainerBuilder {
                     .child(createNameLabel(name))
                     .child(createIcon(pin.getAgentType()));
 
-            if (pin.getAgentData() instanceof HasPercentage) {
-                builder.child(createProgressBar((HasPercentage) pin.getAgentData()));
+            if (pin.getAgentData() instanceof HasStock && pin.getAgentType() != AgentType.AGENT_RETAILER) {
+                builder.child(createProgressBar((HasStock) pin.getAgentData()));
             }
 
             if (pin.getAgentData() instanceof HasLabel) {

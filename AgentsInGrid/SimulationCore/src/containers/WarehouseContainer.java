@@ -29,7 +29,7 @@ public class WarehouseContainer {
         // Trucks
         List<TruckAgent> truckAgentList = new ArrayList<>();
         for (Location location : truckLocations) { // Trucks rest in the warehouses
-            TruckAgent truckAgent = new TruckAgent(location, 50);
+            TruckAgent truckAgent = new TruckAgent(location);
             truckAgentList.add(truckAgent);
             addAgent(Constants.AGENT_TRUCK_PREFIX + idTruckCounter, truckAgent);
             idTruckCounter++;

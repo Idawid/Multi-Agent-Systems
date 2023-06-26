@@ -6,15 +6,13 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import mapUtils.locationPin.*;
 import simulationUtils.Constants;
-import simulationUtils.Task;
+import simulationUtils.Order;
 import simulationUtils.assignmentStrategies.warehouse.ProximityBasedAssignmentStrategy;
 import simulationUtils.assignmentStrategies.warehouse.WarehouseAssignmentStrategy;
 
 import java.util.List;
 
 public class MainHub extends BaseAgent implements AgentTypeProvider, AgentDataProvider {
-    // TODO [1] stock:
-    //  - mainhub has infinite stock, handle stock requests of warehouses
     private WarehouseAssignmentStrategy assignmentStrategy;
 
     public MainHub(Location location) {
@@ -27,6 +25,7 @@ public class MainHub extends BaseAgent implements AgentTypeProvider, AgentDataPr
     protected void setup() {
         super.setup();
         addBehaviour(new ReceiveDeliveryRequestBehaviour());
+        addBehaviour(new HandleStockRequestBehaviour());
     }
 
     private class ReceiveDeliveryRequestBehaviour extends CyclicBehaviour {
@@ -38,7 +37,7 @@ public class MainHub extends BaseAgent implements AgentTypeProvider, AgentDataPr
 
             if (deliveryRequest != null) {
                 try {
-                    Task incomingRequest = (Task) deliveryRequest.getContentObject();
+                    Order incomingRequest = (Order) deliveryRequest.getContentObject();
 
                     List<WarehouseAgent> warehouseAgents = (List<WarehouseAgent>) findAgentsByClass(WarehouseAgent.class);
 
@@ -57,6 +56,33 @@ public class MainHub extends BaseAgent implements AgentTypeProvider, AgentDataPr
             else {
                 block();
             }
+        }
+    }
+    public class HandleStockRequestBehaviour extends CyclicBehaviour {
+        @Override
+        public void action() {
+            MessageTemplate requestTemplate = MessageTemplate.MatchConversationId(Constants.MSG_ID_STOCK_REQUEST);
+            ACLMessage stockRequest = myAgent.receive(requestTemplate);
+
+            if (stockRequest != null) {
+                try {
+                    int requestedStock = Integer.parseInt(stockRequest.getContent());
+                    // send back always
+                    sendStock(requestedStock, stockRequest.getSender());
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                block();
+            }
+        }
+
+        private void sendStock(int requestedStock, AID sender) {
+            ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
+            reply.setConversationId(Constants.MSG_ID_STOCK);
+            reply.setContent(String.valueOf(requestedStock));
+            reply.addReceiver(sender);
+            myAgent.send(reply);
         }
     }
     protected void takeDown() {

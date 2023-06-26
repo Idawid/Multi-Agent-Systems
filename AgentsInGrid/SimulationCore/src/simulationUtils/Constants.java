@@ -18,5 +18,9 @@ public class Constants {
     public static final String MSG_ID_DELIVERY_INSTRUCTION = "DeliveryInstruction";
     public static final String MSG_ID_TASK_TAKEOVER_REQUEST = "TakeoverRequest";
     public static final String MSG_ID_TASK_TAKEOVER_RESPONSE = "TakeoverResponse";
+    public static final String MSG_ID_STOCK = "StockDelivery";
+    public static final String MSG_ID_STOCK_REQUEST = "StockRequest";
 
+    public static final int WAREHOUSE_CAPACITY = 100;
+    public static final int TRUCK_CAPACITY = 100;
 }

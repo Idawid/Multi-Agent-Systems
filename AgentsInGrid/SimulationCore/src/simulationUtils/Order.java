@@ -2,18 +2,19 @@ package simulationUtils;
 
 import jade.core.AID;
 import mapUtils.locationPin.Location;
+import simulationUtils.task.ProductType;
 
 import java.io.Serializable;
 import java.util.UUID;
 
-public class Task implements Serializable {
+public class Order implements Serializable {
     private final UUID id;
     private Location destination;
     private AID destinationAID;
     private ProductType product;
     private int quantity;
 
-    public Task(Location destination, ProductType product, int quantity, AID destinationAID) {
+    public Order(Location destination, ProductType product, int quantity, AID destinationAID) {
         this.id = UUID.randomUUID();
         this.destination = destination;
         this.product = product;

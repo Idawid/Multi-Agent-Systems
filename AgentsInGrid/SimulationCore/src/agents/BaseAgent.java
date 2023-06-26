@@ -25,7 +25,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 
 public abstract class BaseAgent extends Agent implements LocationMapObserver, Serializable {
@@ -143,24 +142,15 @@ public abstract class BaseAgent extends Agent implements LocationMapObserver, Se
                         response.setContentObject(agent);
                         response.addReceiver(request.getSender());
 
-                        // debug - object size
-//                        Object object = response.getContentObject();
-//                        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-//                        new ObjectOutputStream(byteStream).writeObject(object);
-//
-//                        long size = byteStream.toByteArray().length;
-//                        System.out.println("Object size: " + size + " bytes");
-//
-//                        byteStream.close();
-                        // end debug - object size
-
                         agent.send(response);
                     } catch (IOException e) {
                         if (e instanceof NotSerializableException) {
                             logger.log(Logger.SEVERE, "Object of class " + agent.getClass().getSimpleName() +
                                     " is not serializable! Make sure all fields of the object are serializable.", e);
                         }
-                        throw new RuntimeException(e);
+                    } catch (Exception e) {
+                        System.out.println(agent.getLocalName() + " is down");
+                        return;
                     }
                     // TODO: Thread exception handling
                 }
@@ -184,9 +174,7 @@ public abstract class BaseAgent extends Agent implements LocationMapObserver, Se
                     agentInstances.add(agentClass.cast(agentInstance));
                 }
             }
-        } catch (FIPAException e) {
-            e.printStackTrace();
-        }
+        } catch (FIPAException e) { }
 
         return agentInstances;
     }
@@ -197,34 +185,14 @@ public abstract class BaseAgent extends Agent implements LocationMapObserver, Se
         // System.out.println("Object request sent to: " + agentAID.getLocalName());
         send(request);
         //System.out.println("Start block receive for: " + agentAID.getLocalName());
-        ACLMessage response = blockingReceive(MessageTemplate.MatchConversationId(Constants.MSG_ID_INSTANCE_INFORM));
+        ACLMessage response = blockingReceive(MessageTemplate.MatchConversationId(Constants.MSG_ID_INSTANCE_INFORM), 2000);
         //System.out.println("End block receive for: " + agentAID.getLocalName());
         if (response != null) {
             try {
                 return response.getContentObject();
-            } catch (Exception e) { }
+            } catch (Exception e) {}
         }
         return null;
-    }
-
-    protected void updateLocationPinNonBlocking(String agentName, LocationPin location) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                LocationMap locationMap = (LocationMap) Naming.lookup(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT);
-                locationMap.updateLocationPin(agentName, location);
-            } catch (Exception e) {
-                logger.log(Logger.WARNING, "Failed to update location on the remote map.");
-            }
-        });
-    }
-
-    protected LocationPin getLocationPinBlocking(String agentName) {
-        try {
-            LocationMap locationMap = (LocationMap) Naming.lookup(LocationMap.REMOTE_LOCATION_MAP_ENDPOINT);
-            return locationMap.getLocationPin(agentName);
-        } catch (Exception e) {
-            return null;
-        }
     }
 
     public LocationPin getLocationPin() {
@@ -254,9 +222,8 @@ public abstract class BaseAgent extends Agent implements LocationMapObserver, Se
     public String getPort() {
         return port;
     }
-
     @Override
-    public void locationUpdated(String agentName, LocationPin newLocationPin) {
+    public void locationUpdated(String agentName, LocationPin newLocationPin) throws RemoteException {
         if (agentName != this.getLocalName()) {
             return;
         }
