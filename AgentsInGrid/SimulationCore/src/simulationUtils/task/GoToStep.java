@@ -1,12 +1,13 @@
 package simulationUtils.task;
 
+import jade.core.AID;
 import mapUtils.LocationMap;
 import mapUtils.locationPin.*;
 import simulationUtils.LocationMapUtils;
 
 public class GoToStep extends Step {
 
-    public GoToStep(String initiator, String subject) {
+    public GoToStep(AID initiator, AID subject) {
         super(initiator, subject);
     }
 
@@ -20,9 +21,9 @@ public class GoToStep extends Step {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        LocationPin initiatorPin = LocationMapUtils.getLocationPinBlocking(initiator);
+        LocationPin initiatorPin = LocationMapUtils.getLocationPinBlocking(initiator.getLocalName());
         LocationPin oldInitiatorPin = new LocationPin(initiatorPin);
-        LocationPin targetPin = LocationMapUtils.getLocationPinBlocking(subject);
+        LocationPin targetPin = LocationMapUtils.getLocationPinBlocking(subject.getLocalName());
         if (initiatorPin == null || targetPin == null) return;
         if (!(initiatorPin.getAgentData() instanceof IsMoveable ||
                 ((IsMoveable)initiatorPin.getAgentData()).isMoving())) {
@@ -38,7 +39,7 @@ public class GoToStep extends Step {
 
         ((IsMoveable)initiatorPin.getAgentData()).startMoving();
         for (int i = 0; i < totalSteps; i++) {
-            LocationMapUtils.updateLocationPinNonBlocking(initiator, initiatorPin);
+            LocationMapUtils.updateLocationPinNonBlocking(initiator.getLocalName(), initiatorPin);
             initiatorPin.setX(oldInitiatorPin.getX() + (int) (currentSteps * stepX));
             initiatorPin.setY(oldInitiatorPin.getY() + (int) (currentSteps * stepY));
             currentSteps++;
@@ -48,6 +49,6 @@ public class GoToStep extends Step {
             } catch (InterruptedException e) { }
         }
         ((IsMoveable)initiatorPin.getAgentData()).stopMoving();
-        LocationMapUtils.updateLocationPinNonBlocking(initiator, initiatorPin);
+        LocationMapUtils.updateLocationPinNonBlocking(initiator.getLocalName(), initiatorPin);
     }
 }

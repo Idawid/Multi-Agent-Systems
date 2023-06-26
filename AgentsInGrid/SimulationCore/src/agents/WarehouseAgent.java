@@ -20,11 +20,14 @@ import simulationUtils.task.TransferStockStep;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static simulationUtils.LocationMapUtils.getLocationPinBlocking;
 
 public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, AgentDataProvider {
     // TODO sync [1]:
@@ -36,9 +39,11 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
     private CopyOnWriteArrayList<Order> orders;
     private ConcurrentHashMap<UUID, List<WarehouseAgent>> taskTakeoverAcceptingWarehouses;
     private ConcurrentHashMap<UUID, Integer> taskTakeoverCounter;
+    private int orderedStock;
 
     public WarehouseAgent(Location location) {
         super(location);
+        orderedStock = 0;
     }
 
     public WarehouseAgent() { }
@@ -52,12 +57,18 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
         taskTakeoverCounter = new ConcurrentHashMap<>();
 
         addBehaviour(new ReceiveDeliveryInformBehaviour());
-        addBehaviour(new AssignTrucksBehavior(this, 1000));
+        addBehaviour(new AssignTrucksBehavior(this, 2500));
         addBehaviour(new ReceiveRequestForTakeoverBehaviour());
         addBehaviour(new ReceiveResponseForTakeoverBehaviour());
         addBehaviour(new HandleStockMessagesBehaviour());
         addBehaviour(new RequestStockBehaviour(this, 1000));
         addBehaviour(new HandleStockRequestBehaviour());
+        addBehaviour(new TickerBehaviour(this, 5000) {
+            @Override
+            protected void onTick() {
+                orderedStock = 0;
+            }
+        });
     }
 
     private class ReceiveDeliveryInformBehaviour extends CyclicBehaviour {
@@ -98,37 +109,40 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
                 trucks.removeIf(truckAgent -> !truckAgent.getContainerID().equals(((WarehouseAgent) myAgent).getContainerID()));
                 trucks.removeIf(truckAgent -> truckAgent.getCurrentTask() != null);
                 if (trucks.isEmpty()) {
-                    Order order = orders.remove(0);
-                    askOtherWarehousesToTakeoverTask(order);
                     return;
                 }
                 //System.out.println("debug - warehouse tick has trucks " + myAgent.getLocalName());
+                WarehouseData warehouseData = (WarehouseData) getLocationPin().getAgentData();
                 Order order = orders.remove(0);
+                if (order.getQuantity() > warehouseData.getCurrentStock()) {
+                    askOtherWarehousesToTakeoverTask(order);
+                    return;
+                }
+                int leftStock = warehouseData.getCurrentStock() - order.getQuantity();
                 AID truckAID = truckAssignmentStrategy.assignTruckAgent(order, trucks);
                 ACLMessage deliveryInstruction = new ACLMessage(ACLMessage.INFORM);
                 deliveryInstruction.setConversationId(Constants.MSG_ID_DELIVERY_INFORM);
                 deliveryInstruction.addReceiver(truckAID);
 
                 try {
-                    String truck = truckAID.getLocalName();
-                    String warehouse = myAgent.getLocalName();
-                    String retailer = order.getDestinationAID().getLocalName();
+                    AID truck = truckAID;
+                    AID warehouse = myAgent.getAID();
+                    AID retailer = order.getDestinationAID();
                     int quantity = order.getQuantity();
 
                     Task task = new Task();
-                    task.addStep(new TransferStockStep(truck, warehouse, quantity, TransferStockStep.TransferType.RESERVE));
+                    task.addStep(new TransferStockStep(truck, warehouse, quantity, TransferStockStep.TransferType.RESERVE, null));
                     task.addStep(new GoToStep(truck, warehouse));
-                    task.addStep(new TransferStockStep(truck, warehouse, quantity, TransferStockStep.TransferType.TAKE));
+                    task.addStep(new TransferStockStep(truck, warehouse, quantity, TransferStockStep.TransferType.TAKE, null));
                     task.addStep(new GoToStep(truck, retailer));
-                    task.addStep(new TransferStockStep(truck, retailer, quantity, TransferStockStep.TransferType.GIVE));
-                    task.addStep(new GoToStep(truck, warehouse));
+                    task.addStep(new TransferStockStep(truck, retailer, quantity, TransferStockStep.TransferType.GIVE, null));
 
                     deliveryInstruction.setContentObject(task);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
                 System.out.println(myAgent.getLocalName() + " asked truck: " + truckAID.getLocalName() +
-                        " for a delivery");
+                        " for a delivery. Has stock left: " + leftStock);
                 send(deliveryInstruction);
             }
         }
@@ -174,15 +188,9 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
 
             if (takeoverRequest != null) {
                 try {
-                    // TODO: Increment logic for takeover acceptance
                     Order order = (Order) takeoverRequest.getContentObject();
-                    List<TruckAgent> trucks = (List<TruckAgent>) findAgentsByClass(TruckAgent.class);
-                    if (trucks == null) {
-                        return;
-                    }
-                    trucks.removeIf(truckAgent -> !truckAgent.getContainerID().equals(((WarehouseAgent) myAgent).getContainerID()));
-                    trucks.removeIf(truckAgent -> truckAgent.getCurrentTask() != null);
-                    if (trucks.isEmpty()) {
+                    WarehouseData warehouseData = (WarehouseData) getLocationPin().getAgentData();
+                    if (order.getQuantity() * 2 > warehouseData.getCurrentStock()) {
                         ACLMessage response = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
                         response.setConversationId(Constants.MSG_ID_TASK_TAKEOVER_RESPONSE);
                         response.addReceiver(takeoverRequest.getSender());
@@ -191,8 +199,8 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
-                        System.out.println(myAgent.getLocalName() + " rejecting takeover from: "
-                                + takeoverRequest.getSender().getLocalName());
+//                        System.out.println(myAgent.getLocalName() + " rejecting takeover from: "
+//                                + takeoverRequest.getSender().getLocalName());
                         send(response);
                         return;
                     }
@@ -303,15 +311,22 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
 
             if (stockMsg != null) {
                 try {
-                    int incomingStock = Integer.parseInt(stockMsg.getContent());
-                    int excessStock = checkAndUpdateStock(incomingStock);
-                    if (excessStock > 0) {
-                        ACLMessage reply = stockMsg.createReply();
-                        reply.setConversationId(Constants.MSG_ID_STOCK);
-                        reply.setPerformative(ACLMessage.INFORM);
-                        reply.setContent(String.valueOf(excessStock));
-                        myAgent.send(reply);
+                    if (stockMsg.getPerformative() == ACLMessage.CONFIRM) {
+                        System.out.println("debug - "+ myAgent.getLocalName() +" received stock order confirmation from " + stockMsg.getSender().getLocalName());
+                    } else if (stockMsg.getPerformative() == ACLMessage.REFUSE) {
+                        int canceledOrderStock = Integer.parseInt(stockMsg.getContent());
+                        System.out.println("debug - "+ myAgent.getLocalName() +" received stock order refuse from " + stockMsg.getSender().getLocalName());
+                        orderedStock -= canceledOrderStock;
                     }
+
+//                    int excessStock = checkAndUpdateStock(incomingStock);
+//                    if (excessStock > 0) {
+//                        ACLMessage reply = stockMsg.createReply();
+//                        reply.setConversationId(Constants.MSG_ID_STOCK);
+//                        reply.setPerformative(ACLMessage.INFORM);
+//                        reply.setContent(String.valueOf(excessStock));
+//                        myAgent.send(reply);
+//                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -321,7 +336,7 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
         }
 
         private int checkAndUpdateStock(int incomingStock) {
-            WarehouseData warehouseData = (WarehouseData) ((WarehouseAgent) myAgent).getLocationPin().getAgentData();
+            WarehouseData warehouseData = (WarehouseData) getLocationPin().getAgentData();
             int newStockLevel = warehouseData.getCurrentStock() + incomingStock;
             System.out.println(newStockLevel);
             int excessStock = newStockLevel - warehouseData.getMaxStock();
@@ -346,30 +361,35 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
 
         @Override
         protected void onTick() {
-            WarehouseData warehouseData = (WarehouseData) ((WarehouseAgent) myAgent).getLocationPin().getAgentData();
-            if (warehouseData.getCurrentStock() < LOW_STOCK_THRESHOLD) {
+            WarehouseData warehouseData = (WarehouseData) getLocationPin().getAgentData();
+            System.out.println(myAgent.getLocalName() + " has stock: " + warehouseData.getCurrentStock() +
+                    " and has ordered already: " + orderedStock);
+            if (warehouseData.getCurrentStock() + orderedStock < LOW_STOCK_THRESHOLD) {
                 requestStock();
             }
         }
 
         private void requestStock() {
+            WarehouseData warehouseData = (WarehouseData) getLocationPin().getAgentData();
+            double randomNumber = 0.05 + Math.random() * (0.3 - 0.05);
+            int missingStockPortion = (int) ((Constants.WAREHOUSE_CAPACITY - warehouseData.getCurrentStock()) * randomNumber);
             AID[] agentAIDs = findOtherAgents();
             ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
             request.setConversationId(Constants.MSG_ID_STOCK_REQUEST);
             for (AID agentAID : agentAIDs) {
                 request.addReceiver(agentAID);
+                orderedStock += missingStockPortion;
             }
             // ask for random portion of the missing stock
-            WarehouseData warehouseData = (WarehouseData) ((WarehouseAgent) myAgent).getLocationPin().getAgentData();
-            double randomNumber = 0.05 + Math.random() * (0.3 - 0.05);
-            int missingStockPortion = (int) ((Constants.WAREHOUSE_CAPACITY - warehouseData.getCurrentStock()) * randomNumber);
+
             request.setContent(String.valueOf(missingStockPortion));
-            System.out.println("Requesting: " + missingStockPortion);
+            System.out.println(myAgent.getLocalName() + " requesting stock: " + missingStockPortion);
             myAgent.send(request);
         }
 
         private AID[] findOtherAgents() {
             List<WarehouseAgent> warehouseAgents = (List<WarehouseAgent>) findAgentsByClass(WarehouseAgent.class);
+            warehouseAgents.removeIf(warehouseAgent -> warehouseAgent.getLocalName().equals(myAgent.getLocalName()));
             List<MainHub> mainHubs = (List<MainHub>) findAgentsByClass(MainHub.class);
 
             List<AID> combinedAIDList = Stream.concat(
@@ -391,16 +411,27 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
             if (stockRequest != null) {
                 try {
                     int requestedStock = Integer.parseInt(stockRequest.getContent());
-
-                    WarehouseData warehouseData = (WarehouseData) ((WarehouseAgent) myAgent).getLocationPin().getAgentData();
+                    WarehouseData warehouseData = (WarehouseData) getLocationPin().getAgentData();
                     int newStockLevel = warehouseData.getCurrentStock() - requestedStock;
                     // send back stock if it doesn't put you dangerously low
+
                     if (newStockLevel > LOW_STOCK_THRESHOLD) {
+                        ACLMessage response = new ACLMessage(ACLMessage.CONFIRM);
+                        response.addReceiver(stockRequest.getSender());
+                        response.setContent(String.valueOf(requestedStock));
+                        response.setConversationId(Constants.MSG_ID_STOCK);
+                        send(response);
                         System.out.println(myAgent.getLocalName() + ": Received stock request, sending.");
                         warehouseData.setCurrentStock(newStockLevel);
-                        LocationMapUtils.updateLocationPinNonBlocking(myAgent.getLocalName(), ((WarehouseAgent) myAgent).getLocationPin());
+                        LocationMapUtils.updateLocationPinNonBlocking(myAgent.getLocalName(), getLocationPin());
 
                         sendStock(requestedStock, stockRequest.getSender());
+                    } else {
+                        ACLMessage response = new ACLMessage(ACLMessage.REFUSE);
+                        response.addReceiver(stockRequest.getSender());
+                        response.setContent(String.valueOf(requestedStock));
+                        response.setConversationId(Constants.MSG_ID_STOCK);
+                        send(response);
                     }
 
                 } catch (NumberFormatException e) {
@@ -411,12 +442,56 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
             }
         }
 
-        private void sendStock(int requestedStock, AID sender) {
+        private void sendStock(int requestedStock, AID receiverAID) {
+            List<TruckAgent> trucks = (List<TruckAgent>) findAgentsByClass(TruckAgent.class);
+            if (trucks == null) {
+                ACLMessage response = new ACLMessage(ACLMessage.REFUSE);
+                response.addReceiver(receiverAID);
+                response.setContent(String.valueOf(requestedStock));
+                response.setConversationId(Constants.MSG_ID_STOCK);
+                send(response);
+                return;
+            }
+
+            trucks.removeIf(truckAgent -> !truckAgent.getContainerID().equals(((WarehouseAgent) myAgent).getContainerID()));
+            trucks.removeIf(truckAgent -> truckAgent.getCurrentTask() != null);
+            if (trucks.isEmpty()) {
+                ACLMessage response = new ACLMessage(ACLMessage.REFUSE);
+                response.addReceiver(receiverAID);
+                response.setContent(String.valueOf(requestedStock));
+                response.setConversationId(Constants.MSG_ID_STOCK);
+                send(response);
+                return;
+            }
+            //System.out.println("debug - warehouse tick has trucks " + myAgent.getLocalName());
+            AID truckAID = truckAssignmentStrategy.assignTruckAgent(null, trucks);
+            ACLMessage deliveryInstruction = new ACLMessage(ACLMessage.INFORM);
+            deliveryInstruction.setConversationId(Constants.MSG_ID_DELIVERY_INFORM);
+            deliveryInstruction.addReceiver(truckAID);
+
+            try {
+                AID truck = truckAID;
+                AID giver = myAgent.getAID();
+                AID receiver = receiverAID;
+
+                Task task = new Task();
+                task.addStep(new TransferStockStep(truck, giver, requestedStock, TransferStockStep.TransferType.RESERVE, (WarehouseAgent) this.myAgent));
+                task.addStep(new GoToStep(truck, giver));
+                task.addStep(new TransferStockStep(truck, giver, requestedStock, TransferStockStep.TransferType.TAKE, (WarehouseAgent) this.myAgent));
+                task.addStep(new GoToStep(truck, receiver));
+                task.addStep(new TransferStockStep(truck, receiver, requestedStock, TransferStockStep.TransferType.GIVE, (WarehouseAgent) this.myAgent));
+
+                deliveryInstruction.setContentObject(task);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            System.out.println(myAgent.getLocalName() + " sending stock to " + receiverAID.getLocalName());
             ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
             reply.setConversationId(Constants.MSG_ID_STOCK);
             reply.setContent(String.valueOf(requestedStock));
-            reply.addReceiver(sender);
+            reply.addReceiver(receiverAID);
             myAgent.send(reply);
+            send(deliveryInstruction);
         }
     }
 
@@ -427,5 +502,15 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
     @Override
     public AgentData getAgentData() {
         return new WarehouseData();
+    }
+
+    @Override
+    public LocationPin getLocationPin() {
+        this.locationPin = Objects.requireNonNull(getLocationPinBlocking(this.getLocalName()));
+        return this.locationPin;
+    }
+
+    public void finalizeOrder(int quantity) {
+        orderedStock -= quantity;
     }
 }

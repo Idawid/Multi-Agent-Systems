@@ -5,6 +5,16 @@ public class WarehouseData implements AgentData, HasStock {
     private int maxStock = 50;
     private int reservedStock = 0;
 
+    public int getOrderedStock() {
+        return orderedStock;
+    }
+
+    public void setOrderedStock(int orderedStock) {
+        this.orderedStock = orderedStock;
+    }
+
+    private int orderedStock = 0;
+
     public WarehouseData() {
         new TruckData(0);
     }

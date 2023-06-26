@@ -1,12 +1,14 @@
 package simulationUtils.task;
 
+import jade.core.AID;
+
 import java.io.Serializable;
 
 public abstract class Step implements Serializable {
-    protected String initiator;
-    protected String subject;
+    protected AID initiator;
+    protected AID subject;
 
-    public Step(String initiator, String subject) {
+    public Step(AID initiator, AID subject) {
         this.initiator = initiator;
         this.subject = subject;
     }

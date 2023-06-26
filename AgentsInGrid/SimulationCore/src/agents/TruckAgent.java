@@ -12,9 +12,13 @@ import simulationUtils.Constants;
 import simulationUtils.task.Task;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import static simulationUtils.LocationMapUtils.getLocationPinBlocking;
+import static simulationUtils.LocationMapUtils.updateLocationPinNonBlocking;
 
 public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDataProvider {
     // TODO [1] road events:
@@ -82,8 +86,9 @@ public class TruckAgent extends BaseAgent implements AgentTypeProvider, AgentDat
         @Override
         protected void onTick() {
             if (random.nextDouble() <= eventProbability && currentTask != null) {
-                isBrokeDown = true;
-                setLocationPin(new LocationPin(locationPin.getLocation(), getAgentType(), getAgentData()));
+//                isBrokeDown = true;
+//                System.out.println(myAgent.getLocalName() + " broke down.");
+//                updateLocationPinNonBlocking(myAgent.getLocalName(), new LocationPin(Objects.requireNonNull(getLocationPinBlocking(myAgent.getLocalName())).getLocation(), getAgentType(), getAgentData()));
             }
         }
     }

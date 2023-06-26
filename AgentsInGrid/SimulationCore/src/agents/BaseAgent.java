@@ -152,7 +152,6 @@ public abstract class BaseAgent extends Agent implements LocationMapObserver, Se
                         System.out.println(agent.getLocalName() + " is down");
                         return;
                     }
-                    // TODO: Thread exception handling
                 }
             }
         }

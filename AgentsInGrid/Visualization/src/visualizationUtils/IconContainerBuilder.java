@@ -50,13 +50,13 @@ public class IconContainerBuilder {
     private static ImageView createProgressBar(HasStock stockProvider) {
         String progressBarPath;
         double percentage = (double) stockProvider.getCurrentStock() * 100 / stockProvider.getMaxStock();
-        if (percentage < 20) {
+        if (percentage == 0) {
             progressBarPath = "progress-bar-empty.png";
-        } else if (percentage < 40) {
+        } else if (percentage < 25) {
             progressBarPath = "progress-bar-low.png";
-        } else if (percentage < 60) {
+        } else if (percentage < 50) {
             progressBarPath = "progress-bar-mid.png";
-        } else if (percentage < 80) {
+        } else if (percentage < 75) {
             progressBarPath = "progress-bar-high.png";
         } else {
             progressBarPath = "progress-bar-full.png";
