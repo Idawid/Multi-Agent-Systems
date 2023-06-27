@@ -45,14 +45,14 @@ public class CoreEntry {
 
 
         // Load the locations for different retailers
-        List<Location> retailerLocations = LocationInitializer.generateRandomLocations(5);
+        List<Location> retailerLocations = LocationInitializer.generateRandomLocations(3);
         RetailerContainer retailerContainer = new RetailerContainer(CONTAINER_RETAIL, retailerLocations);
 
         // Load the locations for different warehouses
-        List<Location> warehouseLocations1 = LocationInitializer.generateRandomLocations(3);
+        List<Location> warehouseLocations1 = LocationInitializer.generateRandomLocations(2);
         List<Location> truckLocations1 = new ArrayList<>();
-        truckLocations1.addAll(Collections.nCopies(9, warehouseLocations1.get(0))); // 3 in warehouse 0
-        //truckLocations1.addAll(Collections.nCopies(3, warehouseLocations1.get(1))); // 3 in warehouse 1
+        truckLocations1.addAll(Collections.nCopies(4, warehouseLocations1.get(0))); // 3 in warehouse 0
+        truckLocations1.addAll(Collections.nCopies(3, warehouseLocations1.get(1))); // 3 in warehouse 1
         //truckLocations1.addAll(Collections.nCopies(3, warehouseLocations1.get(2))); // 3 in warehouse 2
         //truckLocations1.addAll(Collections.nCopies(0, warehouseLocations1.get(1))); // 1 in warehouse 1
 

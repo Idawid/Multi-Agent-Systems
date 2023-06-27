@@ -141,8 +141,8 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                System.out.println(myAgent.getLocalName() + " asked truck: " + truckAID.getLocalName() +
-                        " for a delivery. Has stock left: " + leftStock);
+//                System.out.println(myAgent.getLocalName() + " asked truck: " + truckAID.getLocalName() +
+//                        " for a delivery. Has stock left: " + leftStock);
                 send(deliveryInstruction);
             }
         }
@@ -312,10 +312,10 @@ public class WarehouseAgent extends BaseAgent implements AgentTypeProvider, Agen
             if (stockMsg != null) {
                 try {
                     if (stockMsg.getPerformative() == ACLMessage.CONFIRM) {
-                        System.out.println("debug - "+ myAgent.getLocalName() +" received stock order confirmation from " + stockMsg.getSender().getLocalName());
+//                        System.out.println("debug - "+ myAgent.getLocalName() +" received stock order confirmation from " + stockMsg.getSender().getLocalName());
                     } else if (stockMsg.getPerformative() == ACLMessage.REFUSE) {
                         int canceledOrderStock = Integer.parseInt(stockMsg.getContent());
-                        System.out.println("debug - "+ myAgent.getLocalName() +" received stock order refuse from " + stockMsg.getSender().getLocalName());
+//                        System.out.println("debug - "+ myAgent.getLocalName() +" received stock order refuse from " + stockMsg.getSender().getLocalName());
                         orderedStock -= canceledOrderStock;
                     }
 
